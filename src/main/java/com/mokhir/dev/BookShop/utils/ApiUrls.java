@@ -4,7 +4,7 @@ public class ApiUrls {
     public static final String USER_MAIN_URL = "/api/v1/user";
     public static final String AUTHOR_MAIN_URL = "/api/v1/author";
     public static final String BOOK_MAIN_URL = "/api/v1/book";
-    public static final String PRICE_MAIN_URL = "/api/v1/book";
+    public static final String PRICE_MAIN_URL = "/api/v1/price";
     public static final String UNIVERSITY_MAIN_URL = "/api/v1/university";
     public static final String DEPARTMENT_MAIN_URL = "/api/v1/department";
     public static final String ALL = "/all";

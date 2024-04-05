@@ -2,8 +2,6 @@ package com.mokhir.dev.BookShop.controller;
 
 import com.mokhir.dev.BookShop.aggregation.dto.price.PriceRequest;
 import com.mokhir.dev.BookShop.aggregation.dto.price.PriceResponse;
-import com.mokhir.dev.BookShop.aggregation.dto.users.UserRequest;
-import com.mokhir.dev.BookShop.aggregation.dto.users.UserResponse;
 import com.mokhir.dev.BookShop.service.PriceService;
 import io.github.jhipster.web.util.PaginationUtil;
 import lombok.RequiredArgsConstructor;
@@ -23,7 +21,7 @@ import static com.mokhir.dev.BookShop.utils.ApiUrls.*;
 @RequiredArgsConstructor
 @RequestMapping(PRICE_MAIN_URL)
 public class PriceController {
-    private PriceService service;
+    private final PriceService service;
     @GetMapping(ALL)
     ResponseEntity<List<PriceResponse>> findAll(@RequestParam("page") int pageIndex,
                                                @RequestParam("size") int pageSize,
