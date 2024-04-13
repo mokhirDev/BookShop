@@ -3,6 +3,7 @@ package com.mokhir.dev.BookShop.service;
 import com.mokhir.dev.BookShop.aggregation.dto.books.BookRequest;
 import com.mokhir.dev.BookShop.aggregation.dto.books.BookResponse;
 import com.mokhir.dev.BookShop.aggregation.entity.Books;
+import com.mokhir.dev.BookShop.aggregation.entity.User;
 import com.mokhir.dev.BookShop.aggregation.mapper.BookMapper;
 import com.mokhir.dev.BookShop.exceptions.DatabaseException;
 import com.mokhir.dev.BookShop.exceptions.NotFoundException;
@@ -12,6 +13,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+
 import java.util.Optional;
 
 
@@ -21,6 +23,8 @@ public class BookService
         implements EntityServiceInterface<Books, BookRequest, BookResponse, String> {
     private final BookRepository repository;
     private final BookMapper mapper;
+    private final UserService userService;
+
     @Override
     public BookResponse getById(String id) {
         try {
@@ -89,7 +93,7 @@ public class BookService
                 repository.deleteById(realId);
                 return mapper.toDto(byId.get());
             }
-            throw new NotFoundException(realId+": Doesn't exist");
+            throw new NotFoundException(realId + ": Doesn't exist");
         } catch (NotFoundException ex) {
             throw new NotFoundException(ex.getMessage());
         } catch (Exception ex) {
@@ -99,19 +103,41 @@ public class BookService
 
     @Override
     public BookResponse update(BookRequest request) {
-        try{
-            Long id = request.getId();
-            Optional<Books> byId = repository.findById(id);
-            if (byId.isPresent()){
+        try {
+            String createdBy = request.getCreatedBy();
+            Optional<Books> byId = repository.findBooksByCreatedBy(createdBy);
+            if (byId.isPresent()) {
                 mapper.updateFromDto(request, byId.get());
                 Books entity = mapper.toEntity(request);
                 return mapper.toDto(entity);
             }
-            throw new NotFoundException(id+": Didn't found");
+            throw new NotFoundException(createdBy + ": Didn't found");
         } catch (NotFoundException ex) {
             throw new NotFoundException(ex.getMessage());
         } catch (Exception ex) {
             throw new DatabaseException(ex.getMessage());
         }
+    }
+
+    public BookResponse addBook(BookRequest request) {
+        try {
+            String createdBy = request.getCreatedBy();
+            if (!createdBy.isBlank()) {
+                User userByUsername = userService.findUserByUsername(createdBy);
+                if (userByUsername != null) {
+                    Books save = repository.save(mapper.toEntity(request));
+                    BookResponse dto = mapper.toDto(save);
+                    //mapper to'liq ishlamagani uchun bittalab qo'shib qo'ydim
+                    dto.setBook(save);
+                    return dto;
+                }
+            }
+            throw new NotFoundException(createdBy + ": Didn't found");
+        } catch (NotFoundException ex) {
+            throw new NotFoundException(ex.getMessage());
+        } catch (Exception ex) {
+            throw new DatabaseException(ex.getMessage());
+        }
+
     }
 }

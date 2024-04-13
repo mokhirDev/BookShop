@@ -1,11 +1,9 @@
 package com.mokhir.dev.BookShop.service;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mokhir.dev.BookShop.aggregation.dto.role.RoleResponse;
 import com.mokhir.dev.BookShop.aggregation.dto.users.SignInResponse;
 import com.mokhir.dev.BookShop.aggregation.dto.users.UserRequest;
 import com.mokhir.dev.BookShop.aggregation.dto.users.UserResponse;
-import com.mokhir.dev.BookShop.aggregation.entity.Permission;
 import com.mokhir.dev.BookShop.aggregation.entity.Role;
 import com.mokhir.dev.BookShop.aggregation.entity.User;
 import com.mokhir.dev.BookShop.aggregation.mapper.UserMapper;
@@ -16,9 +14,6 @@ import com.mokhir.dev.BookShop.jwt.JwtProvider;
 import com.mokhir.dev.BookShop.repository.interfaces.RoleRepository;
 import com.mokhir.dev.BookShop.service.interfaces.EntityServiceInterface;
 import com.mokhir.dev.BookShop.repository.interfaces.UserRepository;
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.Jwts;
-import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,13 +23,12 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.util.Base64;
-import java.util.List;
 import java.util.Optional;
 
 import static org.springframework.data.jpa.domain.AbstractPersistable_.id;
@@ -112,7 +106,7 @@ public class UserService implements EntityServiceInterface<User, UserRequest, Us
             dto.setFirstName(save.getFirstName());
             dto.setLastName(save.getLastName());
             dto.setUserName(save.getUsername());
-            dto.setRole(save.getRole());
+            dto.setRole(byId);
             return dto;
         } catch (NotFoundException ex) {
             throw new NotFoundException(ex.getMessage());
@@ -154,16 +148,13 @@ public class UserService implements EntityServiceInterface<User, UserRequest, Us
     @Override
     public UserResponse update(UserRequest request) {
         try {
-            String username = request.getUsername();
-            User userByUsername = repository.findUserByUsername(username);
+            User userByUsername = findUserByUsername(request.getUsername());
             if (userByUsername != null) {
                 mapper.updateFromDto(request, userByUsername);
                 User entity = mapper.toEntity(request);
                 return mapper.toDto(entity);
             }
             throw new NotFoundException(id + ": Didn't found");
-        } catch (NotFoundException ex) {
-            throw new NotFoundException(ex.getMessage());
         } catch (Exception ex) {
             throw new DatabaseException(ex.getMessage());
         }
@@ -171,16 +162,10 @@ public class UserService implements EntityServiceInterface<User, UserRequest, Us
 
     public UserResponse addAdmin(UserRequest request) {
         try {
-            String username = request.getUsername();
-            User userByUsername = repository.findUserByUsername(username);
-            if (userByUsername == null) {
-                throw new UsernameNotFoundException("User with id:%s didn't found".formatted(username));
-            }
+            User userByUsername = findUserByUsername(request.getUsername());
             userByUsername.setRole(Role.builder().id(2L).build());
             User save = repository.save(userByUsername);
             return mapper.toDto(save);
-        } catch (UsernameNotFoundException ex) {
-            throw new UsernameNotFoundException(ex.getMessage());
         } catch (Exception ex) {
             throw new DatabaseException(ex.getMessage());
         }
@@ -188,29 +173,56 @@ public class UserService implements EntityServiceInterface<User, UserRequest, Us
 
     public SignInResponse signIn(SignIn signIn) {
         try {
-            User userByUsername = repository.findUserByUsername(signIn.getUsername());
-            if (userByUsername == null ||
-                    !(new BCryptPasswordEncoder().matches(signIn.getPassword(), userByUsername.getPassword()))) {
-                throw new UsernameNotFoundException("User: %s not found".formatted(signIn.getUsername()));
-            }
+            User userByUsername = findUserByUsername(signIn.getUsername());
             SignInResponse signInResponse = jwtProvider
                     .createToken(
                             userByUsername,
                             signIn.isRememberMe());
-
-            Authentication authentication = jwtProvider.getAuthentication(signInResponse.getToken());
-
-            SecurityContextHolder.getContext().setAuthentication(authentication);
-
+            UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(
+                    signIn.getUsername().trim().toLowerCase(),
+                    signIn.getPassword());
+            Authentication authenticate = authenticationManager.authenticate(authenticationToken);
+            SecurityContext context = SecurityContextHolder.getContext();
+            context.setAuthentication(authenticate);
             userByUsername.setIsActive(true);
             repository.save(userByUsername);
             return signInResponse;
+        } catch (Exception ex) {
+            throw new DatabaseException(ex.getMessage());
+        }
+    }
+
+
+    public UserResponse addAuthor(UserRequest request) {
+        try {
+            String username = request.getUsername();
+            if (!username.isBlank()) {
+                User userByUsername = findUserByUsername(username);
+                userByUsername.setRole(Role.builder().id(6L).build());
+                User save = repository.save(userByUsername);
+                UserResponse dto = mapper.toDto(save);
+                dto.setUserName(username);
+                return dto;
+            }
+            return null;
+        } catch (Exception ex) {
+            throw new DatabaseException(ex.getMessage());
+        }
+    }
+
+    public User findUserByUsername(String username) {
+        try {
+            User userByUsername = repository.findUserByUsername(username);
+            if (userByUsername != null) {
+                return userByUsername;
+            } else {
+                throw new UsernameNotFoundException("User: %s not found".formatted(username));
+            }
         } catch (UsernameNotFoundException ex) {
             throw new UsernameNotFoundException(ex.getMessage());
         } catch (Exception ex) {
             throw new DatabaseException(ex.getMessage());
         }
     }
-
 
 }
