@@ -1,10 +1,7 @@
 package com.mokhir.dev.BookShop.controller;
 
-import com.mokhir.dev.BookShop.aggregation.dto.authors.AuthorRequest;
-import com.mokhir.dev.BookShop.aggregation.dto.authors.AuthorResponse;
 import com.mokhir.dev.BookShop.aggregation.dto.books.BookRequest;
 import com.mokhir.dev.BookShop.aggregation.dto.books.BookResponse;
-import com.mokhir.dev.BookShop.service.AuthorService;
 import com.mokhir.dev.BookShop.service.BookService;
 import io.github.jhipster.web.util.PaginationUtil;
 import lombok.RequiredArgsConstructor;
@@ -35,9 +32,9 @@ public class BookController {
         return ResponseEntity.ok().headers(headers).body(page.getContent());
     }
 
-    @PostMapping(ADD)
+    @PostMapping(SIGN_UP)
     ResponseEntity<BookResponse> add(@RequestBody BookRequest request) {
-        return ResponseEntity.ok().body(service.add(request));
+        return ResponseEntity.ok().body(service.signUp(request));
     }
 
     @DeleteMapping

@@ -55,7 +55,7 @@ public class PriceService
     }
 
     @Override
-    public PriceResponse add(PriceRequest request) {
+    public PriceResponse signUp(PriceRequest request) {
         try {
             Prices entity = mapper.toEntity(request);
             Prices save = repository.save(entity);

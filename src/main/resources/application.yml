@@ -1,6 +1,6 @@
 spring:
   datasource:
-    url: jdbc:postgresql://localhost:5432/postgres
+    url: jdbc:postgresql://localhost:5432/book_shop_db
     username: postgres
     password: 0211
     driver-class-name: org.postgresql.Driver
@@ -18,3 +18,7 @@ logging:
   output:
     ansi:
       enabled: always
+jwt:
+  token:
+    secret: ZG9uaWtJbnRlcm5Qcm9qZWN0IDI2LjAyLjIwMjQ
+    validity: 60000

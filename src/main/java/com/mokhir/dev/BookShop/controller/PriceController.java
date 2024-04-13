@@ -32,9 +32,9 @@ public class PriceController {
         return ResponseEntity.ok().headers(headers).body(page.getContent());
     }
 
-    @PostMapping(ADD)
+    @PostMapping(SIGN_UP)
     ResponseEntity<PriceResponse> add(@RequestBody PriceRequest request) {
-        return ResponseEntity.ok().body(service.add(request));
+        return ResponseEntity.ok().body(service.signUp(request));
     }
 
     @DeleteMapping

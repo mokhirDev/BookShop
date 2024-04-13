@@ -55,7 +55,7 @@ public class BookService
     }
 
     @Override
-    public BookResponse add(BookRequest request) {
+    public BookResponse signUp(BookRequest request) {
         try {
             Books entity = mapper.toEntity(request);
             Books save = repository.save(entity);

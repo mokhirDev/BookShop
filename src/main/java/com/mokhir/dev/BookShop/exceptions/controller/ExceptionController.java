@@ -18,7 +18,7 @@ public class ExceptionController {
     @ExceptionHandler(DatabaseException.class)
     public ResponseEntity<ErrorResponse> on(DatabaseException ex) {
         ErrorResponse errorResponse = new ErrorResponse(HttpStatus.BAD_REQUEST.value(),
-                "Some thing went wrong((",
+                "Some thing went wrong, issue in Database",
                 ex.getMessage());
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
     }
