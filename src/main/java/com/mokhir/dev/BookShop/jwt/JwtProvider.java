@@ -6,6 +6,7 @@ import com.mokhir.dev.BookShop.aggregation.entity.User;
 import com.mokhir.dev.BookShop.aggregation.mapper.RoleMapper;
 import com.mokhir.dev.BookShop.repository.interfaces.UserRepository;
 import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.Jws;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import jakarta.servlet.http.HttpServletRequest;
@@ -46,11 +47,9 @@ public class JwtProvider {
 
     public boolean validate(String token) {
         try {
-            Claims claims = Jwts.parser().setSigningKey(secret).parseClaimsJws(token).getBody();
-            Date expirationDate = claims.getExpiration();
-            Date now = new Date();
-            return now.after(expirationDate);
-        } catch (Exception ex) {
+            Jws<Claims> claimsJws = Jwts.parser().setSigningKey(secret).parseClaimsJws(token);
+            return !claimsJws.getBody().getExpiration().before(new Date());
+        } catch (Exception e) {
             return false;
         }
     }

@@ -1,12 +1,11 @@
 package com.mokhir.dev.BookShop.aggregation.entity;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
+import java.io.Serial;
 import java.io.Serializable;
 
 @Getter
@@ -15,12 +14,23 @@ import java.io.Serializable;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
-public class Books implements Serializable {
+@EntityListeners(AuditingEntityListener.class)
+public class Books extends DateAudit implements Serializable {
+    @Serial
+    private static final long serialVersionUID = -367197629124228271L;
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    @NotNull
-    private Long author_id;
-    @NotNull
+
+    @Column(name = "name")
     private String name;
+
+    @Column(name = "price")
+    private Integer price;
+
+    @Column(name = "quantity")
+    private Integer quantity;
+
+    @Column(name = "user_id")
+    private Long userId;
 }

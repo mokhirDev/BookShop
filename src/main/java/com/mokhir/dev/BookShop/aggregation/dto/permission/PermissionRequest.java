@@ -15,6 +15,5 @@ import java.io.Serializable;
 public class PermissionRequest implements Serializable {
     @NotNull
     @NotBlank
-    @JsonProperty("name")
     private Long id;
 }

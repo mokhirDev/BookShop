@@ -21,4 +21,4 @@ logging:
 jwt:
   token:
     secret: ZG9uaWtJbnRlcm5Qcm9qZWN0IDI2LjAyLjIwMjQ
-    validity: 60000
+    validity: 86400000

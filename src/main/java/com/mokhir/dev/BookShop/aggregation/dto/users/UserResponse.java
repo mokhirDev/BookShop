@@ -20,5 +20,5 @@ public class UserResponse implements Serializable {
     private String userName;
     private String firstName;
     private String lastName;
-    private Role role;
+    private RoleResponse role;
 }

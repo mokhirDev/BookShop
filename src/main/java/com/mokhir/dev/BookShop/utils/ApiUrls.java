@@ -9,6 +9,8 @@ public class ApiUrls {
     public static final String UPDATE = "/update";
     public static final String SIGN_UP = "/signUp";
     public static final String ADD_ADMIN = "/add/admin";
+    public static final String ADD_AUTHOR = "/add/author";
+    public static final String ADD_BOOK = "/add/book";
     public static final String DELETE_BY_ID = "/delete";
     public static final String SIGN_IN = "/signIn";
 }
