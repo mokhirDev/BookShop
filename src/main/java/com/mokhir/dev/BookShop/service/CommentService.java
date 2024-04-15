@@ -81,16 +81,14 @@ public class CommentService
                                 .formatted(commentRequest.getBookId()));
             }
             Books book = byId.get();
-            Comments build = Comments
-                    .builder()
-                    .text(commentRequest.getText())
-                    .bookId(commentRequest.getBookId())
-                    .build();
-            repository.save(build);
+            Comments entity = mapper.toEntity(commentRequest);
+            repository.save(entity);
             return CommentResponse
                     .builder()
-                    .id(build.getId())
-                    .text(build.getText())
+                    .id(entity.getId())
+                    .text(entity.getText())
+                    .createdAt(String.valueOf(entity.getCreatedAt()))
+                    .createdBy(String.valueOf(entity.getCreatedBy()))
                     .book(BookResponse.builder().book(book).build())
                     .build();
         } catch (NotFoundException ex) {
