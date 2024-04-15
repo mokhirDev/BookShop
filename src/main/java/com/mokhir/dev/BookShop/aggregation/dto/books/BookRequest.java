@@ -17,6 +17,9 @@ public class BookRequest extends DateAudit implements Serializable {
     @Serial
     private static final long serialVersionUID = -140487446106809996L;
     @NotNull
+    @JsonProperty("id")
+    private Long id;
+    @NotNull
     @JsonProperty("name")
     private String name;
 

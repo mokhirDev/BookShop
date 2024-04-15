@@ -1,10 +1,7 @@
 package com.mokhir.dev.BookShop.controller;
 
-import com.mokhir.dev.BookShop.aggregation.dto.books.BookRequest;
-import com.mokhir.dev.BookShop.aggregation.dto.books.BookResponse;
 import com.mokhir.dev.BookShop.aggregation.dto.users.UserRequest;
 import com.mokhir.dev.BookShop.aggregation.dto.users.UserResponse;
-import com.mokhir.dev.BookShop.service.BookService;
 import com.mokhir.dev.BookShop.service.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -12,7 +9,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import io.github.jhipster.web.util.PaginationUtil;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.util.MultiValueMap;
@@ -25,7 +21,7 @@ import static com.mokhir.dev.BookShop.utils.ApiUrls.*;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping(MAIN_URL)
+@RequestMapping(USER)
 public class UserController {
     private final UserService service;
 
@@ -77,7 +73,7 @@ public class UserController {
 
     @PostMapping(SIGN_UP)
     ResponseEntity<UserResponse> add(@RequestBody @Valid UserRequest request) {
-        return ResponseEntity.ok().body(service.signUp(request));
+        return ResponseEntity.ok().body(service.register(request));
     }
 
     @PostMapping(ADD_AUTHOR)
@@ -85,7 +81,4 @@ public class UserController {
     ResponseEntity<UserResponse> addAuthor(@RequestBody UserRequest request) {
         return ResponseEntity.ok().body(service.addAuthor(request));
     }
-
-
-
 }

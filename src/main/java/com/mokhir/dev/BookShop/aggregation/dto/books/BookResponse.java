@@ -11,6 +11,7 @@ import java.io.Serializable;
 @Getter
 @Setter
 @ToString
+@Builder
 public class BookResponse implements Serializable {
     @Serial
     private static final long serialVersionUID = -4529422928749934475L;

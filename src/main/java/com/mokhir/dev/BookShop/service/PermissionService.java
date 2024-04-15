@@ -13,11 +13,13 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+
 @Service
 @RequiredArgsConstructor
 public class PermissionService implements EntityServiceInterface<Permission, PermissionRequest, PermissionResponse, Long> {
     private final PermissionRepository repository;
     private final PermissionMapper mapper;
+
     @Override
     public PermissionResponse getById(Long aLong) {
         return null;
@@ -39,23 +41,47 @@ public class PermissionService implements EntityServiceInterface<Permission, Per
     }
 
     @Override
-    public PermissionResponse signUp(PermissionRequest permissionRequest) {
-        return null;
+    public PermissionResponse register(PermissionRequest permissionRequest) {
+        try {
+            Permission entity = mapper.toEntity(permissionRequest);
+            repository.save(entity);
+            return mapper.toDto(repository.save(entity));
+        } catch (Exception ex) {
+            throw new DatabaseException(ex.getCause());
+        }
     }
 
     @Override
-    public PermissionResponse remove(PermissionRequest permissionRequest) {
-        return null;
+    public PermissionResponse remove(PermissionRequest req) {
+        try {
+            Permission permissionById = repository.findPermissionById(req.getId());
+            if (permissionById == null) {
+                throw new NotFoundException("Permission did not found, with id: " + req.getId());
+            }
+            repository.delete(permissionById);
+            return mapper.toDto(permissionById);
+        } catch (NotFoundException ex) {
+            throw new NotFoundException(ex.getMessage());
+        } catch (Exception ex) {
+            throw new DatabaseException(ex.getMessage());
+        }
     }
 
-    @Override
-    public PermissionResponse removeById(Long aLong) {
-        return null;
-    }
 
     @Override
-    public PermissionResponse update(PermissionRequest e) {
-        return null;
+    public PermissionResponse update(PermissionRequest req) {
+        try {
+            Permission byId = repository.findPermissionById(req.getId());
+            if (byId == null) {
+                throw new NotFoundException("Permission not found, with id: " + req.getId());
+            }
+            mapper.updateFromDto(req, byId);
+            return mapper.toDto(repository.save(byId));
+        } catch (NotFoundException ex) {
+            throw new NotFoundException(ex.getMessage());
+        } catch (Exception ex) {
+            throw new DatabaseException(ex.getMessage());
+        }
     }
 
     public Permission findByName(String name) {
@@ -65,9 +91,9 @@ public class PermissionService implements EntityServiceInterface<Permission, Per
                 throw new NotFoundException("Permission didn't found");
             }
             return permissionByName;
-        }catch (NotFoundException ex){
+        } catch (NotFoundException ex) {
             throw new NotFoundException(ex.getMessage());
-        }catch (Exception ex){
+        } catch (Exception ex) {
             throw new DatabaseException(ex.getMessage());
         }
     }

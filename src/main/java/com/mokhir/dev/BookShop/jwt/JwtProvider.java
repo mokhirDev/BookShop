@@ -11,8 +11,6 @@ import io.jsonwebtoken.Jws;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import jakarta.servlet.http.HttpServletRequest;
-
-import java.time.Instant;
 import java.util.Base64;
 import java.util.Date;
 
@@ -20,6 +18,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.stereotype.Component;
@@ -46,6 +45,10 @@ public class JwtProvider {
         return null;
     }
 
+    public String getCurrentUser() {
+        return SecurityContextHolder.getContext().getAuthentication().getName();
+    }
+
     public boolean validate(String token) {
         try {
             Jws<Claims> claimsJws = Jwts.parser().setSigningKey(secret).parseClaimsJws(token);
@@ -66,17 +69,11 @@ public class JwtProvider {
     }
 
     public SignInResponse createToken(User user, boolean rememberMe) {
-        System.out.println("00000111");
         SignInResponse signInResponse = new SignInResponse();
-        System.out.println("00000222");
         signInResponse.setId(user.getId());
-        System.out.println(".........................");
         String token = generateToken(user);
-        System.out.println("00000333: "+token);
         signInResponse.setToken(token);
-        System.out.println("00000444");
         signInResponse.setUsername(user.getUsername());
-        System.out.println("00000555");
         signInResponse.setFirstName(user.getFirstName());
         signInResponse.setLastName(user.getLastName());
         signInResponse.setRole(user.getRole());

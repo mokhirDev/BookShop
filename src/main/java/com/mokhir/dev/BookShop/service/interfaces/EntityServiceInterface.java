@@ -6,8 +6,7 @@ import org.springframework.data.domain.Pageable;
 public interface EntityServiceInterface<E, RQ, RS, ID>{
     RS getById(ID id);
     Page<RS> findAll(Pageable pageable);
-    RS signUp(RQ rq);
+    RS register(RQ rq);
     RS remove(RQ rq);
-    RS removeById(ID id);
     RS update(RQ e);
 }

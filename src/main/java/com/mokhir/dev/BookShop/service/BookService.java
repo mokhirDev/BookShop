@@ -7,6 +7,7 @@ import com.mokhir.dev.BookShop.aggregation.entity.User;
 import com.mokhir.dev.BookShop.aggregation.mapper.BookMapper;
 import com.mokhir.dev.BookShop.exceptions.DatabaseException;
 import com.mokhir.dev.BookShop.exceptions.NotFoundException;
+import com.mokhir.dev.BookShop.jwt.JwtProvider;
 import com.mokhir.dev.BookShop.service.interfaces.EntityServiceInterface;
 import com.mokhir.dev.BookShop.repository.interfaces.BookRepository;
 import lombok.RequiredArgsConstructor;
@@ -26,6 +27,7 @@ public class BookService
     private final BookRepository repository;
     private final BookMapper mapper;
     private final UserService userService;
+    private final JwtProvider jwtProvider;
 
     @Override
     public BookResponse getById(String id) {
@@ -52,7 +54,12 @@ public class BookService
             if (all.isEmpty()) {
                 throw new NotFoundException("Book didn't found");
             }
-            return all.map(mapper::toDto);
+            return all.map(book -> {
+                return BookResponse
+                        .builder()
+                        .book(book)
+                        .build();
+            });
         } catch (NotFoundException ex) {
             throw new NotFoundException(ex.getMessage());
         } catch (Exception ex) {
@@ -60,11 +67,12 @@ public class BookService
         }
     }
 
-    public Page<BookResponse> findAllBooksByCreatedBy(BookRequest request, Pageable pageable) {
+    public Page<BookResponse> findAllBooksByCreatedBy(Pageable pageable, String createdBy) {
         try {
-            String createdBy = request.getCreatedBy();
             Page<Books> allBooksByCreatedBy = repository.findAllBooksByCreatedBy(createdBy, pageable);
-            return allBooksByCreatedBy.map(mapper::toDto);
+            return allBooksByCreatedBy.map(book -> {
+                return BookResponse.builder().book(book).build();
+            });
         } catch (NotFoundException ex) {
             throw new NotFoundException(ex.getMessage());
         } catch (Exception ex) {
@@ -73,7 +81,7 @@ public class BookService
     }
 
     @Override
-    public BookResponse signUp(BookRequest request) {
+    public BookResponse register(BookRequest request) {
         try {
             Books entity = mapper.toEntity(request);
             Books save = repository.save(entity);
@@ -88,26 +96,17 @@ public class BookService
     @Override
     public BookResponse remove(BookRequest request) {
         try {
-            Books entity = mapper.toEntity(request);
-            repository.delete(entity);
-            return mapper.toDto(entity);
-        } catch (NotFoundException ex) {
-            throw new NotFoundException(ex.getMessage());
-        } catch (Exception ex) {
-            throw new DatabaseException(ex.getMessage());
-        }
-    }
-
-    @Override
-    public BookResponse removeById(String id) {
-        try {
-            Long realId = Long.valueOf(id);
-            Optional<Books> byId = repository.findById(realId);
-            if (byId.isPresent()) {
-                repository.deleteById(realId);
-                return mapper.toDto(byId.get());
+            String createdBy = jwtProvider.getCurrentUser();
+            Long id = request.getId();
+            if (id == null) {
+                throw new NotFoundException("Book id must not be null");
             }
-            throw new NotFoundException(realId + ": Doesn't exist");
+            Books books = repository.findById(id).orElseThrow(() -> new NotFoundException("Book did not found"));
+            if (!books.getCreatedBy().equals(createdBy)) {
+                throw new NotFoundException("Book does not belong to the current user");
+            }
+            repository.delete(books);
+            return BookResponse.builder().book(books).build();
         } catch (NotFoundException ex) {
             throw new NotFoundException(ex.getMessage());
         } catch (Exception ex) {
@@ -135,7 +134,7 @@ public class BookService
 
     public BookResponse addBook(BookRequest request) {
         try {
-            String createdBy = request.getCreatedBy();
+            String createdBy = jwtProvider.getCurrentUser();
             if (!createdBy.isBlank()) {
                 List<Books> booksByCreatedBy = repository.findAllBooksByCreatedBy(createdBy);
                 for (Books book : booksByCreatedBy) {
@@ -147,17 +146,13 @@ public class BookService
                 }
                 User userByUsername = userService.findUserByUsername(createdBy);
                 if (userByUsername != null) {
-                    Books build = Books.builder()
-                            .quantity(request.getQuantity())
-                            .price(request.getPrice())
-                            .name(request.getName())
-                            .build();
-                    build.setCreatedBy(request.getCreatedBy());
-                    build.setCreatedAt(String.valueOf(LocalDateTime.now()));
-                    build.setUpdatedAt(String.valueOf(LocalDateTime.now()));
-                    repository.save(build);
-                    BookResponse dto = mapper.toDto(build);
-                    dto.setBook(build);
+                    Books entity = mapper.toEntity(request);
+                    entity.setCreatedBy(request.getCreatedBy());
+                    entity.setCreatedAt(String.valueOf(LocalDateTime.now()));
+                    entity.setUpdatedAt(String.valueOf(LocalDateTime.now()));
+                    repository.save(entity);
+                    BookResponse dto = mapper.toDto(entity);
+                    dto.setBook(entity);
                     return dto;
                 }
             }
@@ -168,5 +163,23 @@ public class BookService
             throw new DatabaseException(ex.getMessage());
         }
 
+    }
+
+    public BookResponse getBookById(BookRequest request) {
+        try {
+            Long id = request.getId();
+            if (id == null) {
+                throw new NotFoundException("Book id must not be null");
+            }
+            Books books = repository.findById(id).orElseThrow(() -> new NotFoundException("Book did not exist"));
+            String createdBy = books.getCreatedBy();
+            String currentUser = jwtProvider.getCurrentUser();
+            if (!createdBy.equals(currentUser)) {
+                throw new NotFoundException("Book does not belong to the current user");
+            }
+            return BookResponse.builder().book(books).build();
+        } catch (NotFoundException ex) {
+            throw new NotFoundException(ex.getMessage());
+        }
     }
 }

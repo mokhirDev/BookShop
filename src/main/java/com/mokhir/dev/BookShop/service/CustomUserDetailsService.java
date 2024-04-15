@@ -1,12 +1,9 @@
 package com.mokhir.dev.BookShop.service;
 
-import com.mokhir.dev.BookShop.aggregation.entity.Role;
 import com.mokhir.dev.BookShop.aggregation.entity.User;
 import com.mokhir.dev.BookShop.repository.interfaces.UserRepository;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.NoArgsConstructor;
-import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;

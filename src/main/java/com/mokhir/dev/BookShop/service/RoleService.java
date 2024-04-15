@@ -8,17 +8,14 @@ import com.mokhir.dev.BookShop.aggregation.entity.Role;
 import com.mokhir.dev.BookShop.aggregation.mapper.PermissionMapper;
 import com.mokhir.dev.BookShop.aggregation.mapper.RoleMapper;
 import com.mokhir.dev.BookShop.exceptions.DatabaseException;
+import com.mokhir.dev.BookShop.exceptions.NotFoundException;
 import com.mokhir.dev.BookShop.exceptions.RoleNotFoundException;
-import com.mokhir.dev.BookShop.repository.interfaces.PermissionRepository;
 import com.mokhir.dev.BookShop.repository.interfaces.RoleRepository;
 import com.mokhir.dev.BookShop.service.interfaces.EntityServiceInterface;
 import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-
-import java.util.HashSet;
-import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -28,7 +25,6 @@ import java.util.stream.Collectors;
 public class RoleService implements EntityServiceInterface<Role, RoleRequest, RoleResponse, Long> {
     private final RoleRepository repository;
     private final RoleMapper mapper;
-    private final PermissionRepository permissionRepository;
     private final PermissionMapper permissionMapper;
 
     @Override
@@ -36,12 +32,7 @@ public class RoleService implements EntityServiceInterface<Role, RoleRequest, Ro
         try {
             Optional<Role> byId = repository.findById(id);
             if (byId.isPresent()) {
-                Role role = byId.get();
-                RoleResponse dto = mapper.toDto(role);
-                dto.setName(role.getName());
-                dto.setId(role.getId());
-                dto.setPermissions(role.getPermissions());
-                return dto;
+                return mapper.toDto(byId.get());
             }
             throw new RoleNotFoundException("Role not found, with id: " + id);
         } catch (Exception ex) {
@@ -51,14 +42,23 @@ public class RoleService implements EntityServiceInterface<Role, RoleRequest, Ro
 
     @Override
     public Page<RoleResponse> findAll(Pageable pageable) {
-        return null;
+        try {
+            Page<Role> all = repository.findAll(pageable);
+            if (all.isEmpty()) {
+                throw new NotFoundException("Role didn't found");
+            }
+            return all.map(mapper::toDto);
+        } catch (NotFoundException ex) {
+            throw new NotFoundException(ex.getMessage());
+        } catch (Exception ex) {
+            throw new DatabaseException(ex.getMessage());
+        }
     }
 
     @Override
-    public RoleResponse signUp(RoleRequest roleRequest) {
+    public RoleResponse register(RoleRequest roleRequest) {
         try {
             Role entity = mapper.toEntity(roleRequest);
-            entity.setName(roleRequest.getName());
             Set<PermissionRequest> permissions = roleRequest.getPermissions();
             Set<Permission> permissionsEntity = permissions
                     .stream()
@@ -72,31 +72,50 @@ public class RoleService implements EntityServiceInterface<Role, RoleRequest, Ro
     }
 
     @Override
-    public RoleResponse remove(RoleRequest roleRequest) {
-        return null;
+    public RoleResponse remove(RoleRequest req) {
+        try {
+            Role byName = repository.findByName(req.getName());
+            if (byName == null) {
+                throw new NotFoundException("Role not found, with name: " + req.getName());
+            }
+            repository.delete(byName);
+            return mapper.toDto(byName);
+        } catch (NotFoundException ex) {
+            throw new NotFoundException(ex.getMessage());
+        } catch (Exception ex) {
+            throw new DatabaseException(ex.getMessage());
+        }
     }
+
+
 
     @Override
-    public RoleResponse removeById(Long aLong) {
-        return null;
+    public RoleResponse update(RoleRequest req) {
+        try {
+            Role byName = repository.findByName(req.getName());
+            if (byName == null) {
+                throw new NotFoundException("Role not found, with name: " + req.getName());
+            }
+            mapper.updateFromDto(req, byName);
+            return mapper.toDto(repository.save(byName));
+        } catch (NotFoundException ex) {
+            throw new NotFoundException(ex.getMessage());
+        } catch (Exception ex) {
+            throw new DatabaseException(ex.getMessage());
+        }
     }
-
-    @Override
-    public RoleResponse update(RoleRequest e) {
-        return null;
-    }
-
-//    public RoleResponse update(Role e) {
-//        return repository;
-//    }
 
     public RoleResponse findByName(String name) {
-        Role byName = repository.findByName(name);
-        RoleResponse dto = mapper.toDto(byName);
-        dto.setName(byName.getName());
-        dto.setId(byName.getId());
-        dto.setPermissions(
-                byName.getPermissions());
-        return dto;
+        try {
+            Role byName = repository.findByName(name);
+            if (byName == null) {
+                throw new NotFoundException("Role not found, with name: " + name);
+            }
+            return mapper.toDto(byName);
+        } catch (NotFoundException e) {
+            throw new NotFoundException(e.getMessage());
+        } catch (Exception e) {
+            throw new DatabaseException(e.getMessage());
+        }
     }
 }

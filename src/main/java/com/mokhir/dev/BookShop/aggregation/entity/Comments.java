@@ -1,26 +1,24 @@
 package com.mokhir.dev.BookShop.aggregation.entity;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 import lombok.*;
-
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import java.io.Serializable;
-import java.time.LocalDateTime;
 
 @Getter
 @Setter
 @ToString
 @AllArgsConstructor
 @NoArgsConstructor
+@EntityListeners(AuditingEntityListener.class)
 @Entity
-public class Comments implements Serializable {
+@Builder
+public class Comments extends DateAudit implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    private Long book_id;
-    private Long user_id;
-    private String content;
-    private LocalDateTime created_at;
+    @Column(name = "text")
+    private String text;
+    @Column(name = "book_id")
+    private Long bookId;
 }
