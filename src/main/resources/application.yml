@@ -20,5 +20,5 @@ logging:
       enabled: always
 jwt:
   token:
-    secret: ZG9uaWtJbnRlcm5Qcm9qZWN0IDI2LjAyLjIwMjQ
+    secret: XahU19Uk4kPl8V9im8yR9DLtNjX0uc7DLBhcu/y1jf0=
     validity: 86400000

@@ -6,6 +6,7 @@ import com.mokhir.dev.BookShop.aggregation.dto.users.UserRequest;
 import com.mokhir.dev.BookShop.aggregation.dto.users.UserResponse;
 import com.mokhir.dev.BookShop.aggregation.entity.Role;
 import com.mokhir.dev.BookShop.aggregation.entity.User;
+import com.mokhir.dev.BookShop.aggregation.mapper.RoleMapper;
 import com.mokhir.dev.BookShop.aggregation.mapper.UserMapper;
 import com.mokhir.dev.BookShop.controller.SignIn;
 import com.mokhir.dev.BookShop.exceptions.DatabaseException;
@@ -40,6 +41,7 @@ public class UserService implements EntityServiceInterface<User, UserRequest, Us
     private static final Logger log = LoggerFactory.getLogger(UserService.class);
     private final UserRepository repository;
     private final UserMapper mapper;
+    private final RoleMapper roleMapper;
     private final RoleService roleService;
     private final PermissionService permissionService;
     private final RoleRepository roleRepository;
@@ -173,17 +175,17 @@ public class UserService implements EntityServiceInterface<User, UserRequest, Us
 
     public SignInResponse signIn(SignIn signIn) {
         try {
-            User userByUsername = findUserByUsername(signIn.getUsername());
+            User userByUsername = repository.findUserByUsername(signIn.getUsername());
+            if (userByUsername==null){
+                throw new NotFoundException("User not found");
+            }
+            authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(
+                            signIn.getUsername(), signIn.getPassword()));
             SignInResponse signInResponse = jwtProvider
                     .createToken(
                             userByUsername,
                             signIn.isRememberMe());
-            UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(
-                    signIn.getUsername().trim().toLowerCase(),
-                    signIn.getPassword());
-            Authentication authenticate = authenticationManager.authenticate(authenticationToken);
-            SecurityContext context = SecurityContextHolder.getContext();
-            context.setAuthentication(authenticate);
             userByUsername.setIsActive(true);
             repository.save(userByUsername);
             return signInResponse;
@@ -198,10 +200,12 @@ public class UserService implements EntityServiceInterface<User, UserRequest, Us
             String username = request.getUsername();
             if (!username.isBlank()) {
                 User userByUsername = findUserByUsername(username);
+                RoleResponse byId = roleService.getById(6L);
                 userByUsername.setRole(Role.builder().id(6L).build());
                 User save = repository.save(userByUsername);
                 UserResponse dto = mapper.toDto(save);
                 dto.setUserName(username);
+                dto.setRole(byId);
                 return dto;
             }
             return null;

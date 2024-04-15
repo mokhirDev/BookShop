@@ -9,6 +9,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
@@ -23,38 +24,45 @@ public class BookController {
     private final BookService service;
 
     @GetMapping(ALL)
+    @PreAuthorize("hasAuthority('AUTHOR_ACCESS')")
     ResponseEntity<List<BookResponse>> findAll(@RequestParam("page") int pageIndex,
                                                  @RequestParam("size") int pageSize,
                                                  @RequestParam MultiValueMap<String, String> queryParams,
-                                                 UriComponentsBuilder uriBuilder) {
-        Page<BookResponse> page = service.findAll(PageRequest.of(pageIndex, pageSize));
+                                                 UriComponentsBuilder uriBuilder,
+                                               @RequestBody BookRequest request) {
+        Page<BookResponse> page = service.findAllBooksByCreatedBy(request,PageRequest.of(pageIndex, pageSize));
         HttpHeaders headers = PaginationUtil.generatePaginationHttpHeaders(uriBuilder.queryParams(queryParams), page);
         return ResponseEntity.ok().headers(headers).body(page.getContent());
     }
 
-    @PostMapping(SIGN_UP)
-    ResponseEntity<BookResponse> add(@RequestBody BookRequest request) {
-        return ResponseEntity.ok().body(service.signUp(request));
-    }
-
     @DeleteMapping
+    @PreAuthorize("hasAuthority('AUTHOR_ACCESS')")
     ResponseEntity<BookResponse> remove(@RequestBody BookRequest request) {
         return ResponseEntity.ok().body(service.remove(request));
     }
 
 
     @DeleteMapping(DELETE_BY_ID)
+    @PreAuthorize("hasAuthority('AUTHOR_ACCESS')")
     ResponseEntity<BookResponse> removeById(@RequestBody BookRequest request) {
         return ResponseEntity.ok().body(service.remove(request));
     }
 
     @PutMapping(UPDATE)
+    @PreAuthorize("hasAuthority('AUTHOR_ACCESS')")
     ResponseEntity<BookResponse> update(@RequestBody BookRequest request) {
         return ResponseEntity.ok().body(service.update(request));
     }
 
     @GetMapping(GET_BY_ID)
+    @PreAuthorize("hasAuthority('AUTHOR_ACCESS')")
     ResponseEntity<BookResponse> getById(@PathVariable String entityId) {
         return ResponseEntity.ok().body(service.getById(entityId));
+    }
+
+    @PostMapping(ADD_BOOK)
+    @PreAuthorize("hasAuthority('AUTHOR_ACCESS')")
+    ResponseEntity<BookResponse> addBook(@RequestBody BookRequest request) {
+        return ResponseEntity.ok().body(service.addBook(request));
     }
 }

@@ -14,6 +14,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 
 
@@ -51,6 +53,18 @@ public class BookService
                 throw new NotFoundException("Book didn't found");
             }
             return all.map(mapper::toDto);
+        } catch (NotFoundException ex) {
+            throw new NotFoundException(ex.getMessage());
+        } catch (Exception ex) {
+            throw new DatabaseException(ex.getMessage());
+        }
+    }
+
+    public Page<BookResponse> findAllBooksByCreatedBy(BookRequest request, Pageable pageable) {
+        try {
+            String createdBy = request.getCreatedBy();
+            Page<Books> allBooksByCreatedBy = repository.findAllBooksByCreatedBy(createdBy, pageable);
+            return allBooksByCreatedBy.map(mapper::toDto);
         } catch (NotFoundException ex) {
             throw new NotFoundException(ex.getMessage());
         } catch (Exception ex) {
@@ -123,12 +137,27 @@ public class BookService
         try {
             String createdBy = request.getCreatedBy();
             if (!createdBy.isBlank()) {
+                List<Books> booksByCreatedBy = repository.findAllBooksByCreatedBy(createdBy);
+                for (Books book : booksByCreatedBy) {
+                    String bookName = book.getName().replaceAll(" ", "").toLowerCase();
+                    String newBookName = request.getName().replaceAll(" ", "").toLowerCase();
+                    if (bookName.equals(newBookName)) {
+                        throw new DatabaseException(bookName + ": Book already exists");
+                    }
+                }
                 User userByUsername = userService.findUserByUsername(createdBy);
                 if (userByUsername != null) {
-                    Books save = repository.save(mapper.toEntity(request));
-                    BookResponse dto = mapper.toDto(save);
-                    //mapper to'liq ishlamagani uchun bittalab qo'shib qo'ydim
-                    dto.setBook(save);
+                    Books build = Books.builder()
+                            .quantity(request.getQuantity())
+                            .price(request.getPrice())
+                            .name(request.getName())
+                            .build();
+                    build.setCreatedBy(request.getCreatedBy());
+                    build.setCreatedAt(String.valueOf(LocalDateTime.now()));
+                    build.setUpdatedAt(String.valueOf(LocalDateTime.now()));
+                    repository.save(build);
+                    BookResponse dto = mapper.toDto(build);
+                    dto.setBook(build);
                     return dto;
                 }
             }

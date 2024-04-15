@@ -1,7 +1,8 @@
 package com.mokhir.dev.BookShop.jwt;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.mokhir.dev.BookShop.aggregation.dto.users.SignInResponse;
-import com.mokhir.dev.BookShop.aggregation.entity.Role;
 import com.mokhir.dev.BookShop.aggregation.entity.User;
 import com.mokhir.dev.BookShop.aggregation.mapper.RoleMapper;
 import com.mokhir.dev.BookShop.repository.interfaces.UserRepository;
@@ -65,17 +66,24 @@ public class JwtProvider {
     }
 
     public SignInResponse createToken(User user, boolean rememberMe) {
+        System.out.println("00000111");
         SignInResponse signInResponse = new SignInResponse();
+        System.out.println("00000222");
         signInResponse.setId(user.getId());
-        signInResponse.setToken(generateToken(user));
+        System.out.println(".........................");
+        String token = generateToken(user);
+        System.out.println("00000333: "+token);
+        signInResponse.setToken(token);
+        System.out.println("00000444");
         signInResponse.setUsername(user.getUsername());
+        System.out.println("00000555");
         signInResponse.setFirstName(user.getFirstName());
         signInResponse.setLastName(user.getLastName());
-        signInResponse.setRole(roleMapper.toDto(user.getRole()));
-        if (rememberMe){
+        signInResponse.setRole(user.getRole());
+        if (rememberMe) {
             user.setRefreshToken(generateRefreshToken(user));
             signInResponse.setRefreshToken(user.getRefreshToken());
-        }else {
+        } else {
             user.setRefreshToken(null);
         }
         userRepository.save(user);
@@ -87,16 +95,16 @@ public class JwtProvider {
     }
 
     private String generateToken(User user) {
-        Instant now = Instant.now();
-        Instant validity = now.plusMillis(validTime);
+        Date now = new Date();
+        Date validity = new Date(now.getTime() + validTime);
         Claims claims = Jwts.claims().setSubject(user.getUsername());
-        claims.put("role", user.getRole());
-        String compact = Jwts.builder()
+        ObjectMapper objectMapper = new ObjectMapper();
+        objectMapper.registerModule(new JavaTimeModule());
+        claims.put("roles", user.getRole());
+        return Jwts.builder()
                 .setClaims(claims)
-                .setIssuedAt(Date.from(now))
-                .setExpiration(Date.from(validity))
-                .setHeaderParam("typ", "JWT")
+                .setIssuedAt(new Date())
+                .setExpiration(validity)
                 .signWith(SignatureAlgorithm.HS256, secret).compact();
-        return compact;
     }
 }

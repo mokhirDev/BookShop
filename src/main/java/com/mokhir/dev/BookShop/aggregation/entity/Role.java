@@ -20,7 +20,7 @@ import java.util.Set;
 @EntityListeners(AuditingEntityListener.class)
 public class Role extends DateAudit implements Serializable{
     @Serial
-    private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 5214659867290735515L;
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;

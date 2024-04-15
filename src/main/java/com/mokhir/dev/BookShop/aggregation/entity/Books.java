@@ -14,6 +14,7 @@ import java.io.Serializable;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
+@Builder
 @EntityListeners(AuditingEntityListener.class)
 public class Books extends DateAudit implements Serializable {
     @Serial
@@ -30,7 +31,4 @@ public class Books extends DateAudit implements Serializable {
 
     @Column(name = "quantity")
     private Integer quantity;
-
-    @Column(name = "user_id")
-    private Long userId;
 }

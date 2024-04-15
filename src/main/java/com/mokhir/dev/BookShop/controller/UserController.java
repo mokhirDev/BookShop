@@ -18,6 +18,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
+
 import java.util.List;
 
 import static com.mokhir.dev.BookShop.utils.ApiUrls.*;
@@ -27,7 +28,6 @@ import static com.mokhir.dev.BookShop.utils.ApiUrls.*;
 @RequestMapping(MAIN_URL)
 public class UserController {
     private final UserService service;
-    private final BookService bookService;
 
     @GetMapping(ALL)
     @PreAuthorize("hasAuthority('ADMIN_ACCESS')")
@@ -86,10 +86,6 @@ public class UserController {
         return ResponseEntity.ok().body(service.addAuthor(request));
     }
 
-    @PostMapping(ADD_BOOK)
-    @PreAuthorize("hasAuthority('AUTHOR_ACCESS')")
-    ResponseEntity<BookResponse> addBook(@RequestBody BookRequest request) {
-        return ResponseEntity.ok().body(bookService.addBook(request));
-    }
+
 
 }

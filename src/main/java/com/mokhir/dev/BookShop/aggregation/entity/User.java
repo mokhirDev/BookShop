@@ -23,7 +23,7 @@ public class User {
     private String lastName;
     @NotNull
     @Column(unique = true, nullable = false, updatable = false)
-    private String username;
+    public String username;
     @NotNull
     @Size(max = 100, min = 5)
     private String password;

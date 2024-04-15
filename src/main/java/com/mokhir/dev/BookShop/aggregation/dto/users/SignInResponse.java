@@ -1,11 +1,13 @@
 package com.mokhir.dev.BookShop.aggregation.dto.users;
 
 import com.mokhir.dev.BookShop.aggregation.dto.role.RoleResponse;
+import com.mokhir.dev.BookShop.aggregation.entity.Role;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
 
 import java.util.Set;
-@Data
+@Setter
+@Getter
 @ToString
 @AllArgsConstructor
 @NoArgsConstructor
@@ -19,7 +21,7 @@ public class SignInResponse {
 
     private String lastName;
 
-    private RoleResponse role;
+    private Role role;
 
     private String token;
 
