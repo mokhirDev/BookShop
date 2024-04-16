@@ -27,7 +27,7 @@ public class UserController {
 
     @GetMapping(ALL)
     @PreAuthorize("hasAuthority('ADMIN_ACCESS')")
-    ResponseEntity<List<UserResponse>> findAll(@RequestParam("page") int pageIndex,
+    public ResponseEntity<List<UserResponse>> findAll(@RequestParam("page") int pageIndex,
                                                @RequestParam("size") int pageSize,
                                                @RequestParam MultiValueMap<String, String> queryParams,
                                                UriComponentsBuilder uriBuilder) {
@@ -38,19 +38,19 @@ public class UserController {
 
     @DeleteMapping
     @PreAuthorize("hasAuthority('ADMIN_ACCESS')")
-    ResponseEntity<UserResponse> remove(@RequestBody UserRequest request) {
+    public ResponseEntity<UserResponse> remove(@RequestBody UserRequest request) {
         return ResponseEntity.ok().body(service.remove(request));
     }
 
 
     @DeleteMapping(DELETE_BY_ID)
     @PreAuthorize("hasAuthority('ADMIN_ACCESS')")
-    ResponseEntity<UserResponse> removeById(@RequestBody UserRequest request) {
+    public ResponseEntity<UserResponse> removeById(@RequestBody UserRequest request) {
         return ResponseEntity.ok().body(service.remove(request));
     }
 
     @PutMapping(UPDATE)
-    ResponseEntity<UserResponse> update(@RequestBody UserRequest request) {
+    public ResponseEntity<UserResponse> update(@RequestBody UserRequest request) {
         return ResponseEntity.ok().body(service.update(request));
     }
 
@@ -62,7 +62,7 @@ public class UserController {
 
     @PostMapping(ADD_ADMIN)
     @PreAuthorize("hasAuthority('ADMIN_ACCESS')")
-    ResponseEntity<UserResponse> addAdmin(@RequestBody UserRequest request) {
+    public ResponseEntity<UserResponse> addAdmin(@RequestBody UserRequest request) {
         return ResponseEntity.ok().body(service.addAdmin(request));
     }
 
@@ -72,13 +72,13 @@ public class UserController {
     }
 
     @PostMapping(SIGN_UP)
-    ResponseEntity<UserResponse> add(@RequestBody @Valid UserRequest request) {
+    public ResponseEntity<UserResponse> add(@RequestBody @Valid UserRequest request) {
         return ResponseEntity.ok().body(service.register(request));
     }
 
     @PostMapping(ADD_AUTHOR)
     @PreAuthorize("hasAuthority('ADMIN_ACCESS')")
-    ResponseEntity<UserResponse> addAuthor(@RequestBody UserRequest request) {
+    public ResponseEntity<UserResponse> addAuthor(@RequestBody UserRequest request) {
         return ResponseEntity.ok().body(service.addAuthor(request));
     }
 }

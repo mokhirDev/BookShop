@@ -3,10 +3,11 @@ package com.mokhir.dev.BookShop.service;
 import com.mokhir.dev.BookShop.aggregation.dto.books.BookResponse;
 import com.mokhir.dev.BookShop.aggregation.dto.comments.CommentRequest;
 import com.mokhir.dev.BookShop.aggregation.dto.comments.CommentResponse;
-import com.mokhir.dev.BookShop.aggregation.entity.Books;
+import com.mokhir.dev.BookShop.aggregation.entity.Book;
 import com.mokhir.dev.BookShop.aggregation.entity.Comments;
 import com.mokhir.dev.BookShop.aggregation.mapper.CommentMapper;
 import com.mokhir.dev.BookShop.exceptions.DatabaseException;
+import com.mokhir.dev.BookShop.exceptions.EntityHaveDuplicateException;
 import com.mokhir.dev.BookShop.exceptions.NotFoundException;
 import com.mokhir.dev.BookShop.jwt.JwtProvider;
 import com.mokhir.dev.BookShop.repository.interfaces.BookRepository;
@@ -34,11 +35,11 @@ public class CommentService
     public Page<CommentResponse> findAll(Pageable pageable) {
         Page<Comments> all = repository.findAll(pageable);
         return all.map(comment -> {
-            Books books = bookRepository.findById(comment.getBookId()).get();
+            Book book = bookRepository.findById(comment.getBookId()).get();
             return CommentResponse.builder()
                     .id(comment.getId())
                     .text(comment.getText())
-                    .book(BookResponse.builder().book(books).build())
+                    .book(BookResponse.builder().book(book).build())
                     .createdAt(comment.getCreatedAt()) // Используйте текущее время
                     .createdBy(comment.getCreatedBy())
                     .build();
@@ -53,7 +54,7 @@ public class CommentService
             }
             Comments comments = repository.findById(id).orElseThrow(() -> new NotFoundException("id not found"));
             Long bookId = comments.getBookId();
-            Books book = bookRepository.findById(bookId).orElseThrow(
+            Book book = bookRepository.findById(bookId).orElseThrow(
                     () -> new NotFoundException("book with id:%d not found".formatted(bookId)));
             return CommentResponse
                     .builder()
@@ -74,13 +75,16 @@ public class CommentService
     @Override
     public CommentResponse register(CommentRequest commentRequest) {
         try {
-            Optional<Books> byId = bookRepository.findById(commentRequest.getBookId());
+            Optional<Book> byId = bookRepository.findById(commentRequest.getBookId());
             if (byId.isEmpty()) {
                 throw new NotFoundException(
                         "Book with id:%d did not found"
                                 .formatted(commentRequest.getBookId()));
             }
-            Books book = byId.get();
+            if (existDuplicate(commentRequest)) {
+                throw new EntityHaveDuplicateException("Current comment already exists");
+            }
+            Book book = byId.get();
             Comments entity = mapper.toEntity(commentRequest);
             repository.save(entity);
             return CommentResponse
@@ -136,5 +140,16 @@ public class CommentService
         } catch (Exception ex) {
             throw new DatabaseException(ex.getMessage());
         }
+    }
+
+    protected boolean existDuplicate(CommentRequest request) {
+        String text = request.getText();
+        String currentUser = jwtProvider.getCurrentUser();
+        List<Comments> commentsByCreatedBy = repository.findCommentsByCreatedBy(currentUser);
+        return commentsByCreatedBy
+                .stream()
+                .anyMatch(comment ->
+                        comment.getText().toLowerCase().replaceAll(" ", "")
+                                .equals(text.toLowerCase().replaceAll(" ", "")));
     }
 }

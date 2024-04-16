@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <configuration>
-    <property name="DEV_HOME" value="./students-to-do-app/logs"/>
-    <property name="APP_NAME" value="students-to-do-app"/>
+    <property name="DEV_HOME" value="./book-shop-app/logs"/>
+    <property name="APP_NAME" value="book-shop-app"/>
 
     <include resource="logback-common.xml"/>
     <include resource="org/springframework/boot/logging/logback/base.xml" />

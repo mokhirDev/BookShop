@@ -2,17 +2,17 @@ package com.mokhir.dev.BookShop.aggregation.mapper;
 
 import com.mokhir.dev.BookShop.aggregation.dto.books.BookRequest;
 import com.mokhir.dev.BookShop.aggregation.dto.books.BookResponse;
-import com.mokhir.dev.BookShop.aggregation.entity.Books;
+import com.mokhir.dev.BookShop.aggregation.entity.Book;
 import com.mokhir.dev.BookShop.aggregation.mapper.interfaces.EntityMapper;
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Component;
 
 @Component
-public class BookMapper implements EntityMapper<Books, BookRequest, BookResponse> {
+public class BookMapper implements EntityMapper<Book, BookRequest, BookResponse> {
 
     @Override
     @Primary
-    public BookResponse toDto(Books entity) {
+    public BookResponse toDto(Book entity) {
         if (entity == null) {
             return null;
         }
@@ -23,11 +23,11 @@ public class BookMapper implements EntityMapper<Books, BookRequest, BookResponse
 
     @Override
     @Primary
-    public Books toEntity(BookRequest req) {
+    public Book toEntity(BookRequest req) {
         if (req == null) {
             return null;
         }
-        return Books.builder()
+        return Book.builder()
                 .id(req.getId())
                 .name(req.getName())
                 .price(req.getPrice())
@@ -37,7 +37,7 @@ public class BookMapper implements EntityMapper<Books, BookRequest, BookResponse
 
     @Override
     @Primary
-    public void updateFromDto(BookRequest req, Books entity) {
+    public void updateFromDto(BookRequest req, Book entity) {
         if (req == null) {
             return;
         }

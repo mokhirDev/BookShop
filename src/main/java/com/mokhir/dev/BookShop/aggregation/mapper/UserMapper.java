@@ -28,6 +28,7 @@ public class UserMapper implements EntityMapper<User, UserRequest, UserResponse>
                 .firstName(entity.getFirstName())
                 .lastName(entity.getLastName())
                 .role(roleToRoleResponse(entity.getRole()))
+                .userName(entity.getUsername())
                 .build();
     }
 

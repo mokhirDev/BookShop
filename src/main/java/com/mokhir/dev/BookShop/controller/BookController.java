@@ -25,7 +25,7 @@ public class BookController {
 
     @GetMapping(ALL)
     @PreAuthorize("hasAuthority('AUTHOR_ACCESS')")
-    ResponseEntity<Page<BookResponse>> findAll(@RequestParam("page") int pageIndex,
+    public ResponseEntity<Page<BookResponse>> findAll(@RequestParam("page") int pageIndex,
                                                @RequestParam("size") int pageSize,
                                                @RequestParam MultiValueMap<String, String> queryParams,
                                                UriComponentsBuilder uriBuilder) {
@@ -37,7 +37,7 @@ public class BookController {
 
     @GetMapping(ALL_BOOKS)
     @PreAuthorize("hasAuthority('ADMIN_ACCESS')")
-    ResponseEntity<Page<BookResponse>> findAllBooks(@RequestParam("page") int pageIndex,
+    public ResponseEntity<Page<BookResponse>> findAllBooks(@RequestParam("page") int pageIndex,
                                                     @RequestParam("size") int pageSize,
                                                     @RequestParam MultiValueMap<String, String> queryParams,
                                                     UriComponentsBuilder uriBuilder) {
@@ -48,7 +48,7 @@ public class BookController {
 
     @GetMapping(ALL_BOOKS_BY_AUTHOR)
     @PreAuthorize("hasAuthority('ADMIN_ACCESS')")
-    ResponseEntity<Page<BookResponse>> findAllBooksByAuthor(@RequestParam("page") int pageIndex,
+    public ResponseEntity<Page<BookResponse>> findAllBooksByAuthor(@RequestParam("page") int pageIndex,
                                                             @RequestParam("size") int pageSize,
                                                             @RequestParam MultiValueMap<String, String> queryParams,
                                                             UriComponentsBuilder uriBuilder,
@@ -62,26 +62,26 @@ public class BookController {
 
     @DeleteMapping
     @PreAuthorize("hasAuthority('AUTHOR_ACCESS')")
-    ResponseEntity<BookResponse> remove(@RequestBody BookRequest request) {
+    public ResponseEntity<BookResponse> remove(@RequestBody BookRequest request) {
         return ResponseEntity.ok().body(service.remove(request));
     }
 
 
     @PutMapping(UPDATE)
     @PreAuthorize("hasAuthority('AUTHOR_ACCESS')")
-    ResponseEntity<BookResponse> update(@RequestBody BookRequest request) {
+    public ResponseEntity<BookResponse> update(@RequestBody BookRequest request) {
         return ResponseEntity.ok().body(service.update(request));
     }
 
     @GetMapping
     @PreAuthorize("hasAuthority('AUTHOR_ACCESS')")
-    ResponseEntity<BookResponse> getBookById(@RequestBody BookRequest request) {
+    public ResponseEntity<BookResponse> getBookById(@RequestBody BookRequest request) {
         return ResponseEntity.ok().body(service.getBookById(request));
     }
 
     @PostMapping(ADD_BOOK)
     @PreAuthorize("hasAuthority('AUTHOR_ACCESS')")
-    ResponseEntity<BookResponse> addBook(@RequestBody BookRequest request) {
+    public ResponseEntity<BookResponse> addBook(@RequestBody BookRequest request) {
         return ResponseEntity.ok().body(service.addBook(request));
     }
 }

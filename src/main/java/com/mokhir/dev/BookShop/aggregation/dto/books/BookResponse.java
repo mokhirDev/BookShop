@@ -1,6 +1,6 @@
 package com.mokhir.dev.BookShop.aggregation.dto.books;
 
-import com.mokhir.dev.BookShop.aggregation.entity.Books;
+import com.mokhir.dev.BookShop.aggregation.entity.Book;
 import lombok.*;
 
 import java.io.Serial;
@@ -15,5 +15,5 @@ import java.io.Serializable;
 public class BookResponse implements Serializable {
     @Serial
     private static final long serialVersionUID = -4529422928749934475L;
-    private Books book;
+    private Book book;
 }

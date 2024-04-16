@@ -87,7 +87,8 @@ public class UserService implements EntityServiceInterface<User, UserRequest, Us
                     .build();
             User entity = mapper.toEntity(request);
             entity.setRole(build);
-            return mapper.toDto(repository.save(entity));
+            User save = repository.save(entity);
+            return mapper.toDto(save);
         } catch (NotFoundException ex) {
             throw new NotFoundException(ex.getMessage());
         } catch (Exception ex) {

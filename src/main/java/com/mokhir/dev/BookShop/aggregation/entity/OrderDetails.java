@@ -1,34 +1,33 @@
 package com.mokhir.dev.BookShop.aggregation.entity;
 
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotNull;
 import lombok.*;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.io.Serial;
 import java.io.Serializable;
-
 @Getter
 @Setter
 @ToString
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
-@Builder
+@Table(name = "order_details")
 @EntityListeners(AuditingEntityListener.class)
-public class Books extends DateAudit implements Serializable {
+public class OrderDetails extends DateAudit implements Serializable {
     @Serial
-    private static final long serialVersionUID = -367197629124228271L;
+    private static final long serialVersionUID = 889875136484343708L;
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
-    @Column(name = "name")
-    private String name;
-
+    @ManyToOne
+    @JoinColumn(name = "order_id")
+    private Order order;
+    @ManyToOne
+    @JoinColumn(name = "book_id")
+    private Book book;
     @Column(name = "price")
     private Integer price;
-
     @Column(name = "quantity")
     private Integer quantity;
 }

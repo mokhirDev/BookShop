@@ -3,7 +3,7 @@ package com.mokhir.dev.BookShop.aggregation.mapper;
 import com.mokhir.dev.BookShop.aggregation.dto.books.BookResponse;
 import com.mokhir.dev.BookShop.aggregation.dto.comments.CommentRequest;
 import com.mokhir.dev.BookShop.aggregation.dto.comments.CommentResponse;
-import com.mokhir.dev.BookShop.aggregation.entity.Books;
+import com.mokhir.dev.BookShop.aggregation.entity.Book;
 import com.mokhir.dev.BookShop.aggregation.entity.Comments;
 import com.mokhir.dev.BookShop.aggregation.mapper.interfaces.EntityMapper;
 import org.springframework.context.annotation.Primary;
@@ -26,7 +26,7 @@ public class CommentMapper implements EntityMapper<Comments, CommentRequest, Com
                 .book(
                         BookResponse.builder()
                                 .book(
-                                        Books.builder().id(entity.getId()).build())
+                                        Book.builder().id(entity.getId()).build())
                                 .build())
                 .build();
     }

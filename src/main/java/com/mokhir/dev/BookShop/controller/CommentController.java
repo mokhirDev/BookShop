@@ -25,7 +25,7 @@ public class CommentController {
     private final CommentService service;
 
     @GetMapping(ALL)
-    ResponseEntity<Page<CommentResponse>> findAll(@RequestParam("page") int pageIndex,
+    public ResponseEntity<Page<CommentResponse>> findAll(@RequestParam("page") int pageIndex,
                                                   @RequestParam("size") int pageSize,
                                                   @RequestParam MultiValueMap<String, String> queryParams,
                                                   UriComponentsBuilder uriBuilder) {
@@ -37,14 +37,14 @@ public class CommentController {
     }
 
     @GetMapping(GET_BY_ID)
-    ResponseEntity<CommentResponse> getById(@PathVariable Long entityId) {
+    public ResponseEntity<CommentResponse> getById(@PathVariable Long entityId) {
         CommentResponse byId = service.getById(entityId);
         return ResponseEntity.ok().body(byId);
     }
 
     @PostMapping(ADD)
     @PreAuthorize("hasAuthority('USER_ACCESS')")
-    ResponseEntity<CommentResponse> add(@RequestBody @Valid CommentRequest request) {
+    public ResponseEntity<CommentResponse> add(@RequestBody @Valid CommentRequest request) {
         return ResponseEntity.ok().body(service.register(request));
     }
 }
