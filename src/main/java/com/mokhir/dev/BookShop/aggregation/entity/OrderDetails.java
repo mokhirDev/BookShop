@@ -12,6 +12,7 @@ import java.io.Serializable;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
+@Builder
 @Table(name = "order_details")
 @EntityListeners(AuditingEntityListener.class)
 public class OrderDetails extends DateAudit implements Serializable {

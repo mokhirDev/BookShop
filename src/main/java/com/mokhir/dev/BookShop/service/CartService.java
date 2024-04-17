@@ -8,6 +8,7 @@ import com.mokhir.dev.BookShop.aggregation.entity.Cart;
 import com.mokhir.dev.BookShop.aggregation.mapper.CartMapper;
 import com.mokhir.dev.BookShop.exceptions.CurrentUserNotOwnCurrentEntityException;
 import com.mokhir.dev.BookShop.exceptions.DatabaseException;
+import com.mokhir.dev.BookShop.exceptions.LimitCrowdedException;
 import com.mokhir.dev.BookShop.exceptions.NotFoundException;
 import com.mokhir.dev.BookShop.jwt.JwtProvider;
 import com.mokhir.dev.BookShop.repository.interfaces.BookRepository;
@@ -16,11 +17,15 @@ import com.mokhir.dev.BookShop.service.interfaces.CartServiceInterface;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Service
 @RequiredArgsConstructor
@@ -31,16 +36,24 @@ public class CartService implements CartServiceInterface {
     private final JwtProvider jwtProvider;
 
     @Override
+    @Transactional
     public CartResponse addToCart(CartRequest cartRequest) {
         try {
             Long bookId = cartRequest.getBookId();
-            Optional<Book> byId = bookRepository.findById(bookId);
-            if (byId.isEmpty()) {
-                throw new NotFoundException("Book with current id:%d not found".formatted(bookId));
+            Integer inCartQuantity = cartRequest.getQuantity();
+            Book book = bookRepository.findById(bookId).orElseThrow(() ->
+                    new NotFoundException("Book with current id:%d not found".formatted(bookId)));
+            List<Cart> allByCreatedBy = cartRepository.findAllByCreatedBy(jwtProvider.getCurrentUser());
+            if (!checkAvailabilityQuantityBook(allByCreatedBy, book, inCartQuantity)) {
+                throw new LimitCrowdedException("Limit crowded, books:%d, you want to add:%d, wasted:%d"
+                        .formatted(book.getQuantity(),
+                                inCartQuantity,
+                                inCartQuantity - (book.getQuantity() - countBooksInCard(allByCreatedBy, book))));
             }
-            Cart save = cartRepository
-                    .save(cartMapper.toEntity(cartRequest));
-            return cartMapper.toDto(save);
+            Cart entity = cartMapper.toEntity(cartRequest);
+            entity.setBook(book);
+            cartRepository.save(entity);
+            return cartMapper.toDto(entity);
         } catch (NotFoundException e) {
             throw new NotFoundException(e.getMessage());
         } catch (Exception e) {
@@ -96,11 +109,13 @@ public class CartService implements CartServiceInterface {
     public Page<CartResponse> getAllCarts(Pageable pageable) {
         try {
             String currentUser = jwtProvider.getCurrentUser();
-            Page<Cart> allByCreatedBy = cartRepository.findAllByCreatedBy(currentUser, pageable);
-            if (allByCreatedBy.isEmpty()) {
+            List<Cart> cartList = cartRepository.findAllByCreatedBy(currentUser);
+            if (cartList.isEmpty()) {
                 throw new NotFoundException("Current user:%s doesn't have any cards".formatted(currentUser));
             }
-            return allByCreatedBy.map(cartMapper::toDto);
+            PageRequest pageRequest = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize());
+            Page<Cart> cartPage = new PageImpl<>(cartList, pageRequest, cartList.size());
+            return cartPage.map(cartMapper::toDto);
         } catch (NotFoundException e) {
             throw new NotFoundException(e.getMessage());
         } catch (Exception e) {
@@ -136,7 +151,7 @@ public class CartService implements CartServiceInterface {
                 throw new NotFoundException("Current user:%s doesn't have any carts".formatted(currentUser));
             }
             cartRepository.deleteAllByCreatedBy(currentUser);
-           return ResponseMessage
+            return ResponseMessage
                     .builder()
                     .message("All carts deleted")
                     .currentUser(currentUser)
@@ -144,6 +159,39 @@ public class CartService implements CartServiceInterface {
                     .build();
         } catch (NotFoundException e) {
             throw new NotFoundException(e.getMessage());
+        } catch (Exception e) {
+            throw new DatabaseException(e.getMessage());
+        }
+    }
+
+    private boolean checkAvailabilityQuantityBook
+            (List<Cart> allByCreatedBy, Book book, Integer expectedCount) {
+        if (allByCreatedBy.isEmpty()) {
+            return true;
+        }
+        if (expectedCount < 0) {
+            return false;
+        }
+        return countBooksInCard(allByCreatedBy, book) + expectedCount <= book.getQuantity();
+    }
+
+    private Integer countBooksInCard(List<Cart> allByCreatedBy, Book book) {
+        List<Cart> cartList = allByCreatedBy.stream()
+                .filter(cart -> cart.getBook().getId().equals(book.getId()))
+                .collect(Collectors.toList());
+        if (cartList.isEmpty()) {
+            return 0;
+        }
+        int reduce = cartList.stream()
+                .mapToInt(Cart::getQuantity)
+                .reduce(0, Integer::sum);
+        return reduce;
+    }
+
+    @Transactional
+    public void removeFromCart(List<Long> cartList) {
+        try {
+            cartRepository.deleteAllById(cartList);
         } catch (Exception e) {
             throw new DatabaseException(e.getMessage());
         }

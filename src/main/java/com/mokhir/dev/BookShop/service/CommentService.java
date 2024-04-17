@@ -5,6 +5,7 @@ import com.mokhir.dev.BookShop.aggregation.dto.comments.CommentRequest;
 import com.mokhir.dev.BookShop.aggregation.dto.comments.CommentResponse;
 import com.mokhir.dev.BookShop.aggregation.entity.Book;
 import com.mokhir.dev.BookShop.aggregation.entity.Comments;
+import com.mokhir.dev.BookShop.aggregation.mapper.BookMapper;
 import com.mokhir.dev.BookShop.aggregation.mapper.CommentMapper;
 import com.mokhir.dev.BookShop.exceptions.DatabaseException;
 import com.mokhir.dev.BookShop.exceptions.EntityHaveDuplicateException;
@@ -30,19 +31,16 @@ public class CommentService
     private final BookRepository bookRepository;
     private final JwtProvider jwtProvider;
     private final CommentMapper mapper;
+    private final BookMapper bookMapper;
 
     @Override
     public Page<CommentResponse> findAll(Pageable pageable) {
         Page<Comments> all = repository.findAll(pageable);
         return all.map(comment -> {
             Book book = bookRepository.findById(comment.getBookId()).get();
-            return CommentResponse.builder()
-                    .id(comment.getId())
-                    .text(comment.getText())
-                    .book(BookResponse.builder().book(book).build())
-                    .createdAt(comment.getCreatedAt()) // Используйте текущее время
-                    .createdBy(comment.getCreatedBy())
-                    .build();
+            CommentResponse commentResponse = mapper.toDto(comment);
+            commentResponse.setBook(bookMapper.toDto(book));
+            return commentResponse;
         });
     }
 
@@ -62,7 +60,7 @@ public class CommentService
                     .text(comments.getText())
                     .createdAt(String.valueOf(comments.getCreatedAt()))
                     .createdBy(comments.getCreatedBy())
-                    .book(BookResponse.builder().book(book).build())
+                    .book(bookMapper.toDto(book))
                     .build();
         } catch (NotFoundException e) {
             throw new NotFoundException("id not found");
@@ -93,7 +91,7 @@ public class CommentService
                     .text(entity.getText())
                     .createdAt(String.valueOf(entity.getCreatedAt()))
                     .createdBy(String.valueOf(entity.getCreatedBy()))
-                    .book(BookResponse.builder().book(book).build())
+                    .book(bookMapper.toDto(book))
                     .build();
         } catch (NotFoundException ex) {
             throw new NotFoundException(ex);

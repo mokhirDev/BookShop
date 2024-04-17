@@ -18,7 +18,7 @@ public class CartRequest extends DateAudit implements Serializable {
     private static final long serialVersionUID = 8757150889322423303L;
     @JsonProperty("cartId")
     private Long cartId;
-    @JsonProperty("book_id")
+    @JsonProperty("bookId")
     private Long bookId;
     @JsonProperty("quantity")
     private Integer quantity;

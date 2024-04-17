@@ -17,6 +17,7 @@ import java.util.List;
 @NoArgsConstructor
 @Entity
 @Table(name = "orders")
+@Builder
 @EntityListeners(AuditingEntityListener.class)
 public class Order extends DateAudit implements Serializable {
     @Serial
@@ -25,6 +26,7 @@ public class Order extends DateAudit implements Serializable {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private Long totalAmount;
+    private Long totalPrice;
     @Column(name = "status", columnDefinition = "boolean default true", nullable = false)
     private boolean status;
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)

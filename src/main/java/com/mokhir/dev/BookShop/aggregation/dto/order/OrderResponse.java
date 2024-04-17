@@ -1,10 +1,7 @@
 package com.mokhir.dev.BookShop.aggregation.dto.order;
 
 import com.mokhir.dev.BookShop.aggregation.dto.order.details.OrderDetailsResponse;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import java.util.List;
 
@@ -12,10 +9,11 @@ import java.util.List;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 public class OrderResponse {
     private Long id;
-    private Long userId;
-    private Integer totalAmount;
+    private Long totalAmount;
+    private Long totalPrice;
     private Boolean status;
     private List<OrderDetailsResponse> orderDetails;
 }

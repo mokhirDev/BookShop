@@ -5,12 +5,16 @@ import com.mokhir.dev.BookShop.aggregation.dto.cart.CartRequest;
 import com.mokhir.dev.BookShop.aggregation.dto.cart.CartResponse;
 import com.mokhir.dev.BookShop.aggregation.entity.Book;
 import com.mokhir.dev.BookShop.aggregation.entity.Cart;
+import com.mokhir.dev.BookShop.aggregation.entity.OrderDetails;
 import com.mokhir.dev.BookShop.aggregation.mapper.interfaces.EntityMapper;
+import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Component;
 
 @Component
+@RequiredArgsConstructor
 public class CartMapper implements EntityMapper<Cart, CartRequest, CartResponse> {
+    private final BookMapper bookMapper;
 
     @Override
     @Primary
@@ -19,9 +23,10 @@ public class CartMapper implements EntityMapper<Cart, CartRequest, CartResponse>
             return null;
         }
         return CartResponse.builder()
-                .bookId(cart.getBookId().getId())
-                .totalPrice(cart.getQuantity() * cart.getBookId().getPrice())
-                .price(cart.getBookId().getPrice())
+                .id(cart.getId())
+                .quantity(cart.getQuantity())
+                .bookResponse(bookMapper.toDto(cart.getBook()))
+                .totalPrice(cart.getQuantity() * cart.getBook().getPrice())
                 .build();
     }
 
@@ -33,7 +38,7 @@ public class CartMapper implements EntityMapper<Cart, CartRequest, CartResponse>
         }
         return Cart.builder()
                 .quantity(req.getQuantity())
-                .bookId(Book.builder().id(req.getBookId()).build())
+                .book(Book.builder().id(req.getBookId()).build())
                 .build();
     }
 
@@ -44,10 +49,22 @@ public class CartMapper implements EntityMapper<Cart, CartRequest, CartResponse>
             return;
         }
         if (req.getBookId() != null) {
-            entity.setBookId(Book.builder().id(req.getBookId()).build());
+            entity.setBook(Book.builder().id(req.getBookId()).build());
         }
         if (req.getQuantity() != null) {
             entity.setQuantity(req.getQuantity());
         }
+    }
+
+    public OrderDetails toOrderDetails(Cart cart) {
+        if (cart == null) {
+            return null;
+        }
+        return OrderDetails
+                .builder()
+                .quantity(cart.getQuantity())
+                .price(cart.getBook().getPrice())
+                .book(cart.getBook())
+                .build();
     }
 }

@@ -1,5 +1,6 @@
 package com.mokhir.dev.BookShop.aggregation.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.*;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
@@ -14,7 +15,6 @@ import java.io.Serializable;
 @NoArgsConstructor
 @Builder
 @Entity
-@Table(name = "users_cart")
 @EntityListeners(AuditingEntityListener.class)
 public class Cart extends DateAudit implements Serializable {
     @Serial
@@ -23,7 +23,7 @@ public class Cart extends DateAudit implements Serializable {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "book_id")
-    private Book bookId;
+    @JoinColumn(name = "book_id", referencedColumnName = "id")
+    private Book book;
     private Integer quantity;
 }

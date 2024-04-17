@@ -6,10 +6,12 @@ import com.mokhir.dev.BookShop.aggregation.dto.comments.CommentResponse;
 import com.mokhir.dev.BookShop.aggregation.entity.Book;
 import com.mokhir.dev.BookShop.aggregation.entity.Comments;
 import com.mokhir.dev.BookShop.aggregation.mapper.interfaces.EntityMapper;
+import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Component;
 
 @Component
+@RequiredArgsConstructor
 public class CommentMapper implements EntityMapper<Comments, CommentRequest, CommentResponse> {
 
     @Override
@@ -23,11 +25,6 @@ public class CommentMapper implements EntityMapper<Comments, CommentRequest, Com
                 .text(entity.getText())
                 .createdBy(entity.getCreatedBy())
                 .createdAt(entity.getCreatedAt())
-                .book(
-                        BookResponse.builder()
-                                .book(
-                                        Book.builder().id(entity.getId()).build())
-                                .build())
                 .build();
     }
 

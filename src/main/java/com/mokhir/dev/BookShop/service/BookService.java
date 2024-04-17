@@ -54,12 +54,7 @@ public class BookService
             if (all.isEmpty()) {
                 throw new NotFoundException("Book didn't found");
             }
-            return all.map(book -> {
-                return BookResponse
-                        .builder()
-                        .book(book)
-                        .build();
-            });
+            return all.map(mapper::toDto);
         } catch (NotFoundException ex) {
             throw new NotFoundException(ex.getMessage());
         } catch (Exception ex) {
@@ -70,9 +65,7 @@ public class BookService
     public Page<BookResponse> findAllBooksByCreatedBy(Pageable pageable, String createdBy) {
         try {
             Page<Book> allBooksByCreatedBy = repository.findAllBooksByCreatedBy(createdBy, pageable);
-            return allBooksByCreatedBy.map(book -> {
-                return BookResponse.builder().book(book).build();
-            });
+            return allBooksByCreatedBy.map(mapper::toDto);
         } catch (NotFoundException ex) {
             throw new NotFoundException(ex.getMessage());
         } catch (Exception ex) {
@@ -106,7 +99,7 @@ public class BookService
                 throw new NotFoundException("Book does not belong to the current user");
             }
             repository.delete(book);
-            return BookResponse.builder().book(book).build();
+            return mapper.toDto(book);
         } catch (NotFoundException ex) {
             throw new NotFoundException(ex.getMessage());
         } catch (Exception ex) {
@@ -151,9 +144,7 @@ public class BookService
                     entity.setCreatedAt(String.valueOf(LocalDateTime.now()));
                     entity.setUpdatedAt(String.valueOf(LocalDateTime.now()));
                     repository.save(entity);
-                    BookResponse dto = mapper.toDto(entity);
-                    dto.setBook(entity);
-                    return dto;
+                    return mapper.toDto(entity);
                 }
             }
             throw new NotFoundException(createdBy + ": Didn't found");
@@ -177,7 +168,7 @@ public class BookService
             if (!createdBy.equals(currentUser)) {
                 throw new NotFoundException("Book does not belong to the current user");
             }
-            return BookResponse.builder().book(book).build();
+            return mapper.toDto(book);
         } catch (NotFoundException ex) {
             throw new NotFoundException(ex.getMessage());
         }

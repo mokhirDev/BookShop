@@ -17,7 +17,10 @@ public class BookMapper implements EntityMapper<Book, BookRequest, BookResponse>
             return null;
         }
         return BookResponse.builder()
-                .book(entity)
+                .id(entity.getId())
+                .quantity(entity.getQuantity())
+                .price(entity.getPrice())
+                .name(entity.getName())
                 .build();
     }
 
