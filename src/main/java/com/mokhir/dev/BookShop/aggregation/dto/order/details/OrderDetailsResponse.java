@@ -5,6 +5,7 @@ import lombok.*;
 
 @Getter
 @Setter
+@ToString
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
@@ -14,4 +15,5 @@ public class OrderDetailsResponse {
     private Integer quantity;
     private Long orderId;
     private Integer price;
+    private Integer totalPrice;
 }

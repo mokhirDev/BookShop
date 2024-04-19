@@ -1,5 +1,6 @@
 package com.mokhir.dev.BookShop.controller;
 
+import com.mokhir.dev.BookShop.aggregation.dto.ResponseMessage;
 import com.mokhir.dev.BookShop.aggregation.dto.cart.CartRequest;
 import com.mokhir.dev.BookShop.aggregation.dto.cart.CartResponse;
 import com.mokhir.dev.BookShop.service.CartService;
@@ -9,6 +10,8 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -25,10 +28,21 @@ public class CartController {
 
     @GetMapping("/all")
     @PreAuthorize("hasAuthority('USER_ACCESS')")
-    public ResponseEntity<Page<CartResponse>> getAllCarts(@RequestParam("page") int pageIndex,
-                                                          @RequestParam("size") int pageSize) {
+    public ResponseEntity<ResponseMessage<Page<CartResponse>>> getAllCarts(@RequestParam("page") int pageIndex,
+                                                                           @RequestParam("size") int pageSize) {
         PageRequest pageable = PageRequest.of(pageIndex, pageSize);
-        Page<CartResponse> page = cartService.getAllCarts(pageable);
-        return ResponseEntity.ok().body(page);
+        return ResponseEntity.ok().body(cartService.getAllCarts(pageable));
+    }
+
+    @DeleteMapping("/delete")
+    @PreAuthorize("hasAuthority('USER_ACCESS')")
+    public ResponseEntity<ResponseMessage<CartResponse>> deleteCart(@RequestBody CartRequest cartRequest) {
+        return ResponseEntity.ok().body(cartService.deleteCart(cartRequest));
+    }
+
+    @DeleteMapping("/delete/all")
+    @PreAuthorize("hasAuthority('USER_ACCESS')")
+    public ResponseEntity<ResponseMessage<List<CartResponse>>> deleteAllCarts() {
+        return ResponseEntity.ok().body(cartService.deleteAllCarts());
     }
 }

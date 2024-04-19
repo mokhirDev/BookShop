@@ -1,5 +1,6 @@
 package com.mokhir.dev.BookShop.service;
 
+import com.mokhir.dev.BookShop.aggregation.dto.books.BookResponse;
 import com.mokhir.dev.BookShop.aggregation.dto.order.OrderRequest;
 import com.mokhir.dev.BookShop.aggregation.dto.order.OrderResponse;
 import com.mokhir.dev.BookShop.aggregation.dto.order.details.OrderDetailsResponse;
@@ -33,15 +34,26 @@ public class OrderService implements OrderServiceInterface {
         try {
             List<Cart> cartList = getUserExistsCarts(request.getCartIds());
             List<OrderDetails> orderDetails = orderDetailsService.create(cartList);
-            Long totalAmount = orderDetails.stream().map(OrderDetails::getQuantity).reduce(0, Integer::sum).longValue();
-            Long totalPrice = orderDetails.stream().map(OrderDetails::getPrice).peek(System.out::println).reduce(0, Integer::sum).longValue();
-            System.out.println("=====>total price: " + totalPrice);
-            Order build = Order.builder().totalAmount(totalAmount).totalPrice(totalPrice).status(true).build();
+            Long totalAmount = orderDetails.stream()
+                    .map(OrderDetails::getQuantity)
+                    .reduce(0, Integer::sum)
+                    .longValue();
+            Long totalPrice = orderDetails.stream()
+                    .map(detail->detail.getQuantity()*detail.getPrice())
+                    .reduce(0, Integer::sum)
+                    .longValue();
+            Order build = Order.builder()
+                    .totalAmount(totalAmount)
+                    .status(true)
+                    .totalPrice(totalPrice)
+                    .build();
             Order save = orderRepository.save(build);
             orderDetails.forEach(orderDetail -> orderDetail.setOrder(save));
-            List<OrderDetailsResponse> orderDetailsResponseList = orderDetailsService.updateOrder(orderDetails);
+            List<OrderDetailsResponse> orderDetailsResponseList =
+                    orderDetailsService.updateOrderDetails(orderDetails, cartList);
             return OrderResponse.builder()
                     .id(save.getId())
+                    .status(true)
                     .totalAmount(save.getTotalAmount())
                     .totalPrice(save.getTotalPrice())
                     .orderDetails(orderDetailsResponseList)
@@ -67,7 +79,4 @@ public class OrderService implements OrderServiceInterface {
         cartService.removeFromCart(existCartIds);
         return existCarts;
     }
-//    public OrderResponse createOrder(BookRequest order){
-//
-//    }
 }

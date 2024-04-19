@@ -1,4 +1,5 @@
 package com.mokhir.dev.BookShop.aggregation.dto.comments;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.Size;
 import lombok.*;
@@ -11,7 +12,7 @@ import java.io.Serializable;
 @Getter
 @Setter
 @ToString
-public class CommentRequest implements Serializable{
+public class CommentRequest implements Serializable {
     @Serial
     private static final long serialVersionUID = 2678671092945804184L;
     private Long id;

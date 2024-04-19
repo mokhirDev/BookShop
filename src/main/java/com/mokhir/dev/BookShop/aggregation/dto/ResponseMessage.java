@@ -1,8 +1,7 @@
 package com.mokhir.dev.BookShop.aggregation.dto;
 
 import lombok.*;
-
-import java.util.List;
+import org.springframework.data.domain.Page;
 
 @Setter
 @Getter
@@ -10,8 +9,8 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class ResponseMessage {
+public class ResponseMessage<T> {
     private String message;
     private String currentUser;
-    private List<?> entities;
+    private T entities;
 }

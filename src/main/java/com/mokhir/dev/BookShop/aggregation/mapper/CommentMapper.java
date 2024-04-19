@@ -25,6 +25,8 @@ public class CommentMapper implements EntityMapper<Comments, CommentRequest, Com
                 .text(entity.getText())
                 .createdBy(entity.getCreatedBy())
                 .createdAt(entity.getCreatedAt())
+                .bookId(entity.getBookId())
+                .updatedAt(entity.getUpdatedAt())
                 .build();
     }
 

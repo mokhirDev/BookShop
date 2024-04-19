@@ -26,4 +26,5 @@ public class Cart extends DateAudit implements Serializable {
     @JoinColumn(name = "book_id", referencedColumnName = "id")
     private Book book;
     private Integer quantity;
+    private Integer totalPrice;
 }

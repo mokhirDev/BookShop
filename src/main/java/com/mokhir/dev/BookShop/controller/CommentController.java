@@ -13,6 +13,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.util.MultiValueMap;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
 
@@ -44,7 +45,18 @@ public class CommentController {
 
     @PostMapping(ADD)
     @PreAuthorize("hasAuthority('USER_ACCESS')")
-    public ResponseEntity<CommentResponse> add(@RequestBody @Valid CommentRequest request) {
+    public ResponseEntity<CommentResponse> add(@RequestBody CommentRequest request) {
         return ResponseEntity.ok().body(service.register(request));
+    }
+
+    @PutMapping
+    @PreAuthorize("hasAuthority('USER_ACCESS')")
+    public ResponseEntity<CommentResponse> update(@RequestBody CommentRequest request) {
+        return ResponseEntity.ok().body(service.update(request));
+    }
+
+    @DeleteMapping
+    public ResponseEntity<CommentResponse> delete(@RequestBody CommentRequest request) {
+        return ResponseEntity.ok().body(service.remove(request));
     }
 }

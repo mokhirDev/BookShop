@@ -31,4 +31,7 @@ public class Book extends DateAudit implements Serializable {
 
     @Column(name = "quantity")
     private Integer quantity;
+
+    @Column(name = "active", columnDefinition = "boolean default true")
+    private Boolean active;
 }

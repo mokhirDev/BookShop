@@ -17,7 +17,8 @@ public class CommentResponse implements Serializable {
     private static final long serialVersionUID = -6053162219178407025L;
     private Long id;
     private String text;
-    private BookResponse book;
+    private Long bookId;
     private String createdAt;
     private String createdBy;
+    private String updatedAt;
 }
