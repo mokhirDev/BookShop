@@ -19,6 +19,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import javax.naming.LimitExceededException;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -45,7 +46,7 @@ public class CartService implements CartServiceInterface {
             }
             List<Cart> allByCreatedBy = cartRepository.findAllByCreatedBy(jwtProvider.getCurrentUser());
             if (!checkAvailabilityQuantityBook(allByCreatedBy, book, inCartQuantity)) {
-                throw new LimitCrowdedException("Limit crowded, exist books:%d, in your card:%d, wasted:%d"
+                throw new LimitCrowdedException("Limit crowded, exist books:%d, you want to add:%d, wasted:%d"
                         .formatted(book.getQuantity(),
                                 inCartQuantity,
                                 inCartQuantity - (book.getQuantity() - countBooksInCard(allByCreatedBy, book))));
@@ -194,24 +195,21 @@ public class CartService implements CartServiceInterface {
         } catch (NotFoundException e) {
             throw new NotFoundException(e.getMessage());
         } catch (Exception e) {
-            throw new DatabaseException("deleteAllCarts: "+e.getMessage());
+            throw new DatabaseException("deleteAllCarts: " + e.getMessage());
         }
     }
 
     private boolean checkAvailabilityQuantityBook
             (List<Cart> allByCreatedBy, Book book, Integer expectedCount) {
         try {
-            if (allByCreatedBy.isEmpty()) {
+            if (allByCreatedBy.isEmpty() && expectedCount <= book.getQuantity()) {
                 return true;
             }
             if (expectedCount < 0) {
                 throw new IncorrectValueException("Expected value is must be higher than zero!");
             }
             Integer countBooksInCard = countBooksInCard(allByCreatedBy, book);
-            if (countBooksInCard <= book.getQuantity()) {
-                return countBooksInCard + expectedCount <= book.getQuantity();
-            }
-            return false;
+            return countBooksInCard + expectedCount <= book.getQuantity();
         } catch (Exception e) {
             throw new DatabaseException("checkAvailabilityQuantityBook: " + e.getMessage());
         }

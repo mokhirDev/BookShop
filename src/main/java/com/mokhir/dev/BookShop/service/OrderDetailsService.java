@@ -6,10 +6,15 @@ import com.mokhir.dev.BookShop.aggregation.entity.Cart;
 import com.mokhir.dev.BookShop.aggregation.entity.OrderDetails;
 import com.mokhir.dev.BookShop.aggregation.mapper.BookMapper;
 import com.mokhir.dev.BookShop.aggregation.mapper.CartMapper;
+import com.mokhir.dev.BookShop.aggregation.mapper.OrderDetailsMapper;
+import com.mokhir.dev.BookShop.aggregation.mapper.OrderMapper;
 import com.mokhir.dev.BookShop.exceptions.DatabaseException;
+import com.mokhir.dev.BookShop.jwt.JwtProvider;
 import com.mokhir.dev.BookShop.repository.interfaces.OrderDetailsRepository;
-import com.mokhir.dev.BookShop.repository.interfaces.OrderRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -17,11 +22,13 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 public class OrderDetailsService {
-    private final OrderRepository orderRepository;
     private final OrderDetailsRepository orderDetailsRepository;
     private final CartMapper cartMapper;
     private final BookMapper bookMapper;
     private final BookService bookService;
+    private final JwtProvider jwtProvider;
+    private final OrderMapper orderMapper;
+    private final OrderDetailsMapper orderDetailsMapper;
 
     public List<OrderDetails> create(List<Cart> carts) {
         try {
@@ -29,6 +36,16 @@ public class OrderDetailsService {
             return orderDetailsRepository.saveAll(detailsList);
         } catch (Exception ex) {
             throw new DatabaseException(ex.getMessage());
+        }
+    }
+
+    public Page<OrderDetailsResponse> getAll(int page, int size) {
+        try {
+            List<OrderDetails> allByCreatedBy = orderDetailsRepository.findAllByCreatedBy(jwtProvider.getCurrentUser());
+            List<OrderDetailsResponse> list = allByCreatedBy.stream().map(orderDetailsMapper::toDto).toList();
+            return new PageImpl<>(list, PageRequest.of(page, size), list.size());
+        }catch (Exception e){
+            throw new DatabaseException("OrderDetailsService: getAll: "+e.getMessage());
         }
     }
 
@@ -43,7 +60,7 @@ public class OrderDetailsService {
                         .book(bookMapper.toDto(detail.getBook()))
                         .quantity(detail.getQuantity())
                         .price(detail.getPrice())
-                        .totalPrice(detail.getPrice()*detail.getQuantity())
+                        .totalPrice(detail.getPrice() * detail.getQuantity())
                         .build();
             }).toList();
             orderDetailsResponseList.forEach(detail -> {

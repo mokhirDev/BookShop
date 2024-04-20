@@ -81,4 +81,9 @@ public class UserController {
     public ResponseEntity<UserResponse> addAuthor(@RequestBody UserRequest request) {
         return ResponseEntity.ok().body(service.addAuthor(request));
     }
+
+    @GetMapping
+    public ResponseEntity<UserResponse> info() {
+        return ResponseEntity.ok().body(service.getCurrentUser());
+    }
 }

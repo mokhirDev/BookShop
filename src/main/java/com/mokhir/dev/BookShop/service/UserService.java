@@ -6,6 +6,7 @@ import com.mokhir.dev.BookShop.aggregation.dto.users.UserRequest;
 import com.mokhir.dev.BookShop.aggregation.dto.users.UserResponse;
 import com.mokhir.dev.BookShop.aggregation.entity.Role;
 import com.mokhir.dev.BookShop.aggregation.entity.User;
+import com.mokhir.dev.BookShop.aggregation.mapper.RoleMapper;
 import com.mokhir.dev.BookShop.aggregation.mapper.UserMapper;
 import com.mokhir.dev.BookShop.controller.SignIn;
 import com.mokhir.dev.BookShop.exceptions.DatabaseException;
@@ -38,6 +39,7 @@ public class UserService implements EntityServiceInterface<User, UserRequest, Us
     private final RoleService roleService;
     private final AuthenticationManager authenticationManager;
     private final JwtProvider jwtProvider;
+    private final RoleMapper roleMapper;
 
     @Override
     public UserResponse getById(String id) {
@@ -53,7 +55,6 @@ public class UserService implements EntityServiceInterface<User, UserRequest, Us
         } catch (Exception ex) {
             throw new DatabaseException(ex.getMessage());
         }
-
     }
 
     @Override
@@ -131,9 +132,12 @@ public class UserService implements EntityServiceInterface<User, UserRequest, Us
     public UserResponse addAdmin(UserRequest request) {
         try {
             User userByUsername = findUserByUsername(request.getUsername());
-            userByUsername.setRole(Role.builder().id(2L).build());
-            User save = repository.save(userByUsername);
-            return mapper.toDto(save);
+            RoleResponse byId = roleService.getById(2L);
+            userByUsername.setRole(roleMapper.toEntityFromResponse(byId));
+            repository.save(userByUsername);
+            UserResponse dto = mapper.toDto(userByUsername);
+            dto.setRole(byId);
+            return dto;
         } catch (Exception ex) {
             throw new DatabaseException(ex.getMessage());
         }
@@ -194,4 +198,14 @@ public class UserService implements EntityServiceInterface<User, UserRequest, Us
         }
     }
 
+    public UserResponse getCurrentUser() {
+        try {
+            User userByUsername = repository.findUserByUsername(jwtProvider.getCurrentUser());
+            return mapper.toDto(userByUsername);
+        } catch (NotFoundException ex) {
+            throw new NotFoundException(ex.getMessage());
+        } catch (Exception ex) {
+            throw new DatabaseException(ex.getMessage());
+        }
+    }
 }

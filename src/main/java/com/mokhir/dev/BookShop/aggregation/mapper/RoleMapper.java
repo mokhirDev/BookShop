@@ -47,6 +47,18 @@ public class RoleMapper implements EntityMapper<Role, RoleRequest, RoleResponse>
                 .build();
     }
 
+    public Role toEntityFromResponse(RoleResponse response) {
+        if (response == null) {
+            return null;
+        }
+
+        return Role.builder()
+                .id(response.getId())
+                .name(response.getName())
+                .permissions(response.getPermissions())
+                .build();
+    }
+
     @Override
     @Primary
     public void updateFromDto(RoleRequest req, Role entity) {

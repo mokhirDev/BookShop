@@ -9,6 +9,7 @@ import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collector;
 
 @Getter
 @Setter
@@ -19,7 +20,7 @@ import java.util.List;
 @Table(name = "orders")
 @Builder
 @EntityListeners(AuditingEntityListener.class)
-public class Order extends DateAudit implements Serializable {
+public class Order extends DateAudit implements Serializable, Comparable<Order> {
     @Serial
     private static final long serialVersionUID = -1281151854203875660L;
     @Id
@@ -31,4 +32,9 @@ public class Order extends DateAudit implements Serializable {
     private boolean status;
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<OrderDetails> orderDetails = new ArrayList<>();
+
+    @Override
+    public int compareTo(Order o) {
+        return this.getCreatedAt().compareTo(o.getCreatedAt());
+    }
 }
