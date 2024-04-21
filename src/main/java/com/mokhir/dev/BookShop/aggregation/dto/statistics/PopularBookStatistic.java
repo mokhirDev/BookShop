@@ -8,9 +8,10 @@ import lombok.*;
 @AllArgsConstructor
 @Data
 @Builder
-public class PopularBookResponse {
+public class PopularBookStatistic {
     private Long bookId;
     private String author;
     private String bookName;
     private Long totalQuantity;
+
 }

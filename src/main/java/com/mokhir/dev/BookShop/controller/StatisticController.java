@@ -1,6 +1,9 @@
 package com.mokhir.dev.BookShop.controller;
 
 import com.mokhir.dev.BookShop.aggregation.dto.books.BookResponse;
+import com.mokhir.dev.BookShop.aggregation.dto.statistics.ActiveUserStatistic;
+import com.mokhir.dev.BookShop.aggregation.dto.statistics.AllPopularBookStatistic;
+import com.mokhir.dev.BookShop.aggregation.dto.statistics.PopularBookStatistic;
 import com.mokhir.dev.BookShop.aggregation.dto.users.UserResponse;
 import com.mokhir.dev.BookShop.service.StatisticService;
 import lombok.RequiredArgsConstructor;
@@ -22,22 +25,11 @@ import java.util.List;
 public class StatisticController {
     private final StatisticService statisticService;
 
-    @GetMapping("/user/week")
-    @PreAuthorize("hasAuthority('FULL ACCESS')")
-    public ResponseEntity<Page<UserResponse>> getLastWeekRegisteredUsers
-            (@RequestParam("page") int page, @RequestParam("size") int size) {
-        List<UserResponse> lastWeekRegisteredUsers = statisticService.getLastWeekRegisteredUsers();
-        return ResponseEntity.ok().body(
-                new PageImpl<>(lastWeekRegisteredUsers,
-                        PageRequest.of(page, size),
-                        lastWeekRegisteredUsers.size()));
-    }
-
     @GetMapping("/books")
     @PreAuthorize("hasAuthority('FULL ACCESS')")
-    public ResponseEntity<Page<BookResponse>> getBooks
+    public ResponseEntity<Page<PopularBookStatistic>> getBooks
             (@RequestParam("page") int page, @RequestParam("size") int size) {
-        List<BookResponse> bookResponses = statisticService.getBook();
+        List<PopularBookStatistic> bookResponses = statisticService.getBook();
         return ResponseEntity.ok().body(
                 new PageImpl<>(bookResponses,
                         PageRequest.of(page, size),
@@ -46,9 +38,9 @@ public class StatisticController {
 
     @GetMapping("/books/popular")
     @PreAuthorize("hasAuthority('FULL ACCESS')")
-    public ResponseEntity<Page<BookResponse>> getAllPopularBooks
+    public ResponseEntity<Page<AllPopularBookStatistic>> getAllPopularBooks
             (@RequestParam("page") int page, @RequestParam("size") int size) {
-        List<BookResponse> allPopularBooks = statisticService.getAllPopularBooks();
+        List<AllPopularBookStatistic> allPopularBooks = statisticService.getAllPopularBooks();
         return ResponseEntity.ok().body(
                 new PageImpl<>(allPopularBooks,
                         PageRequest.of(page, size),
@@ -57,24 +49,13 @@ public class StatisticController {
 
     @GetMapping("/users/active")
     @PreAuthorize("hasAuthority('FULL ACCESS')")
-    public ResponseEntity<Page<UserResponse>> getAllActiveUsers
+    public ResponseEntity<Page<ActiveUserStatistic>> getAllActiveUsers
             (@RequestParam("page") int page, @RequestParam("size") int size) {
-        List<UserResponse> allActiveUsers = statisticService.getAllActiveUsers();
+        List<ActiveUserStatistic> allActiveUsers = statisticService.getAllActiveUsers();
         return ResponseEntity.ok().body(
                 new PageImpl<>(allActiveUsers,
                         PageRequest.of(page, size),
                         allActiveUsers.size()));
-    }
-
-    @GetMapping("/users/period")
-    @PreAuthorize("hasAuthority('FULL ACCESS')")
-    public ResponseEntity<Page<UserResponse>> getAllUsersByPeriod
-            (@RequestParam("page") int page, @RequestParam("size") int size) {
-        List<UserResponse> allUsersByPeriod = statisticService.getAllUsersByPeriod();
-        return ResponseEntity.ok().body(
-                new PageImpl<>(allUsersByPeriod,
-                        PageRequest.of(page, size),
-                        allUsersByPeriod.size()));
     }
 
 }
