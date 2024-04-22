@@ -1,28 +1,6 @@
-# Project Name
+# Book Shop
 
-Short description of the project.
-
-## Table of Contents
-
-- [Introduction](#introduction)
-- [Features](#features)
-- [Installation](#installation)
-- [Usage](#usage)
-- [Contributing](#contributing)
-- [License](#license)
-
-## Introduction
-
-Provide a brief introduction to the project, including its purpose and main features.
-
-## Features
-
-List the main features of the project here.
-
-- Feature 1
-- Feature 2
-- ...
-
+Online book shop market.
 ## Installation
 
 Provide instructions on how to install and set up the project.
@@ -43,3 +21,18 @@ npm install
 | 1 | ✅ | done |
 | 2 | ⏱ | in progress |
 | 3 | 🚫 | not started |
+
+| № | Services | Status |
+|-----------------|-----------------|-----------------|
+| 1 | User service | ✅ |
+| 2 | Book service | ✅ |
+| 3 | Statistic service | ✅ |
+| 4 | Comment service | ✅ |
+| 5 | Cart service | ✅ |
+| 6 | Order service | ✅ |
+| 7 | Order details service | ✅ |
+| 8 | Statistic service | ✅ |
+| 9 | Permission service | ✅ |
+| 10 | Role service | ✅ |
+
+
